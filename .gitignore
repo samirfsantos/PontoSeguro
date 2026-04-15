@@ -1,0 +1,22 @@
+# Dependências
+node_modules/
+
+# Variáveis de Ambiente (Segurança Crítica)
+**/.env
+**/.env.local
+**/.env.test
+
+# Logs do Sequelize e do Sistema
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/logs/
+**/*.log
+
+# Pasta de builds (se usar alguma ferramenta de compilação)
+**/dist/
+**/build/
+
+# Configurações de IDEs (Opcional, mas recomendado)
+**/.vscode/
+**/.idea/
