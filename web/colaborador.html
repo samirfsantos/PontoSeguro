@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+  <title>PontoSeguro - Colaborador</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --navy:#0D2137;--navy-mid:#1B3A5C;--green:#00A94F;--green-light:#00C85A;--green-pale:#E8F9EF;
+      --gray-bg:#F4F7FC;--gray-100:#EFF2F7;--gray-200:#E2E8F0;--gray-300:#CBD5E1;--gray-500:#64748B;--gray-700:#334155;
+      --white:#FFFFFF;--red:#EF4444;--red-pale:#FEF2F2;--amber:#F59E0B;--amber-pale:#FFFBEB;--blue:#3B82F6;
+      --status-bar:56px;--nav-height:70px;
+    }
+    html{font-family:'Inter',sans-serif;background:#1B3A5C}
+    body{background:var(--gray-bg);max-width:430px;margin:0 auto;min-height:100vh;position:relative;overflow-x:hidden}
+
+    /* STATUS BAR */
+    .status-bar{height:var(--status-bar);background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100}
+    .sb-time{color:#fff;font-size:15px;font-weight:600}
+    .sb-icons{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.8);font-size:13px}
+
+    /* TOP BAR */
+    .top-bar{background:var(--navy);padding:16px 20px 24px;position:sticky;top:var(--status-bar);z-index:99}
+    .tb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0}
+    .tb-logo{display:flex;align-items:center;gap:10px}
+    .tb-logo .l-icon{width:36px;height:36px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff}
+    .tb-logo .l-name{color:#fff;font-size:17px;font-weight:700}
+    .tb-logo .l-name span{color:var(--green)}
+    .tb-actions{display:flex;gap:10px;align-items:center}
+    .tb-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative}
+    .notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--green);border-radius:50%;border:2px solid var(--navy)}
+
+    /* GREETING */
+    .greeting{background:var(--navy);padding:0 20px 28px}
+    .greet-text{color:rgba(255,255,255,.6);font-size:13px}
+    .greet-name{color:#fff;font-size:22px;font-weight:700;margin-top:2px}
+    .greet-date{color:rgba(255,255,255,.5);font-size:12px;margin-top:4px}
+    .greet-status{display:inline-flex;align-items:center;gap:6px;background:rgba(0,169,79,.2);border:1px solid rgba(0,169,79,.4);color:var(--green);border-radius:100px;padding:4px 12px;font-size:11px;font-weight:600;margin-top:10px}
+
+    /* MAIN CONTENT */
+    .content{padding:0 16px 100px;margin-top:-16px}
+
+    /* TABS */
+    .tabs{display:flex;background:var(--white);border-radius:14px;padding:5px;gap:4px;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:16px}
+    .tab-btn{flex:1;padding:10px 8px;border:none;background:transparent;border-radius:10px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--gray-500);cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px}
+    .tab-btn i{font-size:16px}
+    .tab-btn.active{background:var(--navy);color:#fff}
+
+    /* PANEL */
+    .panel{display:none}
+    .panel.active{display:block}
+
+    /* CLOCK CARD */
+    .clock-card{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);border-radius:20px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden}
+    .clock-card::before{content:'';position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(0,169,79,.08);top:-80px;right:-60px}
+    .clock-display{text-align:center;margin-bottom:20px}
+    .clock-time{color:#fff;font-size:52px;font-weight:800;letter-spacing:-2px;font-variant-numeric:tabular-nums}
+    .clock-date{color:rgba(255,255,255,.6);font-size:14px;margin-top:4px}
+    .clock-shift{display:flex;align-items:center;justify-content:center;gap:6px;color:rgba(255,255,255,.5);font-size:12px;margin-top:6px}
+    .clock-shift span{color:var(--green);font-weight:600}
+
+    .geo-info{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border-radius:10px;padding:10px 14px;margin-bottom:20px}
+    .geo-info i{color:var(--green);font-size:14px}
+    .geo-info .geo-text{flex:1}
+    .geo-info .geo-label{color:rgba(255,255,255,.5);font-size:10px;font-weight:500}
+    .geo-info .geo-val{color:#fff;font-size:12px;font-weight:600}
+    .geo-info .geo-badge{background:rgba(0,169,79,.25);color:var(--green);border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700}
+
+    .punch-btn{width:100%;padding:18px;border:none;border-radius:16px;font-family:'Inter',sans-serif;font-size:17px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;transition:all .2s;position:relative;overflow:hidden}
+    .punch-btn.entrada{background:var(--green);color:#fff}
+    .punch-btn.saida{background:#EF4444;color:#fff}
+    .punch-btn.intervalo{background:var(--amber);color:#fff}
+    .punch-btn:active{transform:scale(.97)}
+    .punch-btn .btn-spinner{display:none;width:20px;height:20px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+    .punch-btn.loading .btn-spinner{display:block}
+    .punch-btn.loading .btn-label{display:none}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .punch-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .punch-mini{padding:13px;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
+    .punch-mini:disabled{opacity:.45;cursor:not-allowed;filter:saturate(.7)}
+    .punch-mini.intervalo-in{background:rgba(245,158,11,.2);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
+    .punch-mini.intervalo-out{background:rgba(59,130,246,.2);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+
+    /* TIMELINE TODAY */
+    .section-title{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+    .section-title a{font-size:12px;color:var(--green);text-decoration:none;font-weight:500}
+
+    .timeline{background:var(--white);border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:16px}
+    .tl-item{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--gray-100);position:relative}
+    .tl-item:last-child{border-bottom:none;padding-bottom:0}
+    .tl-dot{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+    .tl-dot.entrada{background:var(--green-pale);color:var(--green)}
+    .tl-dot.saida{background:var(--red-pale);color:var(--red)}
+    .tl-dot.intervalo{background:var(--amber-pale);color:var(--amber)}
+    .tl-dot.retorno{background:#EFF6FF;color:var(--blue)}
+    .tl-content{flex:1}
+    .tl-label{font-size:13px;font-weight:600;color:var(--gray-700)}
+    .tl-time{font-size:12px;color:var(--gray-500);margin-top:1px}
+    .tl-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px}
+    .tl-badge.ok{background:var(--green-pale);color:var(--green)}
+    .tl-badge.pending{background:var(--amber-pale);color:var(--amber)}
+
+    /* SUMMARY CARDS */
+    .summary-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+    .sum-card{background:var(--white);border-radius:14px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+    .sum-card .sc-label{font-size:11px;color:var(--gray-500);font-weight:500;margin-bottom:6px}
+    .sum-card .sc-value{font-size:22px;font-weight:800;color:var(--navy)}
+    .sum-card .sc-sub{font-size:11px;color:var(--gray-500);margin-top:2px}
+    .sum-card.green .sc-value{color:var(--green)}
+    .sum-card.red .sc-value{color:var(--red)}
+    .sum-card.amber .sc-value{color:var(--amber)}
+
+    /* HISTORY */
+    .history-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+    .hist-card{background:var(--white);border-radius:14px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);display:flex;align-items:center;gap:14px}
+    .hist-day{width:44px;text-align:center;flex-shrink:0}
+    .hist-day .hd-num{font-size:22px;font-weight:800;color:var(--navy)}
+    .hist-day .hd-wk{font-size:10px;color:var(--gray-500);font-weight:500;text-transform:uppercase}
+    .hist-divider{width:1px;height:44px;background:var(--gray-200);flex-shrink:0}
+    .hist-content{flex:1}
+    .hist-hours{font-size:14px;font-weight:700;color:var(--gray-700)}
+    .hist-punches{font-size:11px;color:var(--gray-500);margin-top:2px}
+    .hist-badge{margin-left:auto;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px}
+    .hist-badge.ok{background:var(--green-pale);color:var(--green)}
+    .hist-badge.extra{background:#EFF6FF;color:var(--blue)}
+    .hist-badge.falta{background:var(--red-pale);color:var(--red)}
+    .hist-badge.inc{background:var(--amber-pale);color:var(--amber)}
+
+    /* MONTH FILTER */
+    .month-filter{display:flex;align-items:center;justify-content:space-between;background:var(--white);border-radius:12px;padding:12px 16px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:14px}
+    .mf-btn{background:none;border:none;color:var(--gray-500);font-size:16px;cursor:pointer;padding:4px 8px}
+    .mf-label{font-size:14px;font-weight:700;color:var(--navy)}
+
+    /* REQUESTS */
+    .req-form{background:var(--white);border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:16px}
+    .req-form h3{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .req-form h3 i{color:var(--green)}
+    .form-row{margin-bottom:14px}
+    .form-row label{display:block;font-size:12px;font-weight:600;color:var(--gray-700);margin-bottom:6px}
+    .form-row select,.form-row input,.form-row textarea{width:100%;border:1.5px solid var(--gray-200);border-radius:10px;padding:11px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-700);outline:none;transition:border-color .2s;background:var(--white)}
+    .form-row select:focus,.form-row input:focus,.form-row textarea:focus{border-color:var(--green)}
+    .form-row textarea{resize:vertical;min-height:80px}
+    .btn-submit{width:100%;background:var(--green);color:#fff;border:none;border-radius:12px;padding:14px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s}
+    .btn-submit:hover{background:var(--green-light)}
+
+    .req-list{display:flex;flex-direction:column;gap:10px}
+    .req-item{background:var(--white);border-radius:14px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+    .req-item .ri-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .req-item .ri-type{font-size:13px;font-weight:700;color:var(--navy)}
+    .req-item .ri-status{font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px}
+    .ri-status.pendente{background:var(--amber-pale);color:var(--amber)}
+    .ri-status.aprovado{background:var(--green-pale);color:var(--green)}
+    .ri-status.negado{background:var(--red-pale);color:var(--red)}
+    .req-item .ri-desc{font-size:12px;color:var(--gray-500)}
+    .req-item .ri-date{font-size:11px;color:var(--gray-400);margin-top:4px}
+
+    /* BOTTOM NAV */
+    .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--white);border-top:1px solid var(--gray-200);display:flex;padding:8px 0 16px;z-index:200;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+    .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;background:none;border:none;font-family:'Inter',sans-serif}
+    .nav-item i{font-size:20px;color:var(--gray-300);transition:color .2s}
+    .nav-item span{font-size:10px;color:var(--gray-300);font-weight:500;transition:color .2s}
+    .nav-item.active i{color:var(--navy)}
+    .nav-item.active span{color:var(--navy)}
+
+    /* TOAST */
+    .toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--navy);color:#fff;border-radius:12px;padding:12px 20px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;z-index:999;opacity:0;transition:all .35s;pointer-events:none;white-space:nowrap}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.success .t-icon{color:var(--green)}
+    .toast.error .t-icon{color:#f87171}
+
+    /* PROFILE */
+    .profile-card{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);border-radius:20px;padding:24px;margin-bottom:16px;display:flex;align-items:center;gap:16px}
+    .profile-avatar{width:64px;height:64px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;font-weight:700;flex-shrink:0}
+    .profile-info .pi-name{color:#fff;font-size:18px;font-weight:700}
+    .profile-info .pi-role{color:rgba(255,255,255,.6);font-size:13px;margin-top:2px}
+    .profile-info .pi-id{color:rgba(255,255,255,.4);font-size:11px;margin-top:4px}
+
+    .info-list{background:var(--white);border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;margin-bottom:16px}
+    .info-item{display:flex;align-items:center;gap:14px;padding:16px;border-bottom:1px solid var(--gray-100)}
+    .info-item:last-child{border-bottom:none}
+    .info-item .ii-icon{width:36px;height:36px;border-radius:10px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--green);flex-shrink:0}
+    .info-item .ii-label{font-size:11px;color:var(--gray-500);font-weight:500}
+    .info-item .ii-value{font-size:14px;font-weight:600;color:var(--gray-700)}
+    .info-item .ii-arrow{margin-left:auto;color:var(--gray-300);font-size:13px}
+    .btn-logout{width:100%;background:var(--red-pale);color:var(--red);border:1.5px solid #FECACA;border-radius:12px;padding:14px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+  </style>
+</head>
+<body>
+
+<div class="status-bar">
+  <span class="sb-time" id="statusTime">09:41</span>
+  <div class="sb-icons">
+    <i class="fas fa-signal"></i>
+    <i class="fas fa-wifi"></i>
+    <i class="fas fa-battery-three-quarters"></i>
+  </div>
+</div>
+
+<div class="top-bar">
+  <div class="tb-header">
+    <div class="tb-logo">
+      <div class="l-icon"><i class="fas fa-clock"></i></div>
+      <div class="l-name">Ponto<span>Seguro</span></div>
+    </div>
+    <div class="tb-actions">
+      <button class="tb-btn" onclick="showToast('Sem novas notificacoes','success')">
+        <i class="fas fa-bell"></i>
+        <span class="notif-dot"></span>
+      </button>
+      <button class="tb-btn" onclick="switchTab('perfil')">
+        <i class="fas fa-user"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="greeting">
+  <div class="greet-text">Boa tarde,</div>
+  <div class="greet-name" id="greetName">Colaborador</div>
+  <div class="greet-date" id="greetDate">Segunda-feira, 19 de Abril de 2026</div>
+  <div class="greet-status" id="statusIndicator">
+    <i class="fas fa-circle" style="font-size:7px"></i>
+    <span id="statusLabel">Expediente nao iniciado</span>
+  </div>
+</div>
+
+<div class="content">
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('ponto')" id="tab-ponto">
+      <i class="fas fa-fingerprint"></i>Ponto
+    </button>
+    <button class="tab-btn" onclick="switchTab('historico')" id="tab-historico">
+      <i class="fas fa-calendar-alt"></i>Historico
+    </button>
+    <button class="tab-btn" onclick="switchTab('solicitacoes')" id="tab-solicitacoes">
+      <i class="fas fa-clipboard-list"></i>Pedidos
+    </button>
+    <button class="tab-btn" onclick="switchTab('perfil')" id="tab-perfil">
+      <i class="fas fa-user-circle"></i>Perfil
+    </button>
+  </div>
+
+  <!-- PANEL PONTO -->
+  <div class="panel active" id="panel-ponto">
+
+    <div class="clock-card">
+      <div class="clock-display">
+        <div class="clock-time" id="liveClock">--:--:--</div>
+        <div class="clock-date" id="liveDate">Carregando...</div>
+        <div class="clock-shift">Turno: <span id="shiftLabel">08:00 - 18:00</span></div>
+      </div>
+
+      <div class="geo-info">
+        <i class="fas fa-map-marker-alt"></i>
+        <div class="geo-text">
+          <div class="geo-label">LOCALIZACAO</div>
+          <div class="geo-val" id="geoAddr">Obtendo localizacao...</div>
+        </div>
+        <span class="geo-badge" id="geoBadge">GPS</span>
+      </div>
+
+      <button class="punch-btn entrada" id="punchBtn" onclick="registrarPonto()">
+        <div class="btn-spinner"></div>
+        <span class="btn-label"><i class="fas fa-fingerprint"></i> Registrar Entrada</span>
+      </button>
+      <div class="punch-grid">
+        <button class="punch-mini intervalo-in" id="breakStartBtn" onclick="registrarIntervalo('inicio')">
+          <i class="fas fa-coffee"></i> Inicio Intervalo
+        </button>
+        <button class="punch-mini intervalo-out" id="breakEndBtn" onclick="registrarIntervalo('fim')">
+          <i class="fas fa-play-circle"></i> Fim Intervalo
+        </button>
+      </div>
+    </div>
+
+    <div class="section-title">
+      Registros de Hoje
+      <a href="#" onclick="switchTab('historico')">Ver todos</a>
+    </div>
+    <div class="timeline" id="timelineToday">
+      <div class="tl-item">
+        <div class="tl-dot intervalo"><i class="fas fa-clock"></i></div>
+        <div class="tl-content">
+          <div class="tl-label">Nenhum registro hoje</div>
+          <div class="tl-time">Registre seu ponto acima</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Resumo da Semana</div>
+    <div class="summary-row">
+      <div class="sum-card green">
+        <div class="sc-label">HORAS TRABALHADAS</div>
+        <div class="sc-value" id="horasSemanais">32h 15m</div>
+        <div class="sc-sub">Meta: 40h semanais</div>
+      </div>
+      <div class="sum-card amber">
+        <div class="sc-label">BANCO DE HORAS</div>
+        <div class="sc-value" id="bancoHoras">+2h 30m</div>
+        <div class="sc-sub">Saldo positivo</div>
+      </div>
+      <div class="sum-card">
+        <div class="sc-label">DIAS TRABALHADOS</div>
+        <div class="sc-value">4</div>
+        <div class="sc-sub">De 5 no periodo</div>
+      </div>
+      <div class="sum-card red">
+        <div class="sc-label">ATRASOS</div>
+        <div class="sc-value">1</div>
+        <div class="sc-sub">Ultima semana</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PANEL HISTORICO -->
+  <div class="panel" id="panel-historico">
+    <div class="month-filter">
+      <button class="mf-btn" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+      <span class="mf-label" id="monthLabel">Abril 2026</span>
+      <button class="mf-btn" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <div class="summary-row" style="margin-bottom:16px">
+      <div class="sum-card green">
+        <div class="sc-label">HORAS NO MES</div>
+        <div class="sc-value">156h 40m</div>
+        <div class="sc-sub">Meta: 176h mensais</div>
+      </div>
+      <div class="sum-card">
+        <div class="sc-label">BANCO DE HORAS</div>
+        <div class="sc-value amber" style="color:var(--amber)">+4h 20m</div>
+        <div class="sc-sub">Saldo acumulado</div>
+      </div>
+    </div>
+
+    <div class="section-title">Registros do Mes</div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <!-- PANEL SOLICITACOES -->
+  <div class="panel" id="panel-solicitacoes">
+    <div class="req-form">
+      <h3><i class="fas fa-plus-circle"></i>Nova Solicitacao</h3>
+      <div class="form-row">
+        <label>Tipo de Solicitacao</label>
+        <select id="reqType">
+          <option value="">Selecione...</option>
+          <option value="correcao">Correcao de Ponto</option>
+          <option value="atestado">Atestado Medico</option>
+          <option value="ferias">Ferias</option>
+          <option value="folga">Folga Compensatoria</option>
+          <option value="abono">Abono de Falta</option>
+          <option value="horas">Banco de Horas</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Data</label>
+        <input type="date" id="reqDate" />
+      </div>
+      <div class="form-row">
+        <label>Descricao</label>
+        <textarea id="reqDesc" placeholder="Descreva o motivo da solicitacao..."></textarea>
+      </div>
+      <button class="btn-submit" onclick="submitRequest()">
+        <i class="fas fa-paper-plane"></i> Enviar Solicitacao
+      </button>
+    </div>
+
+    <div class="section-title">Minhas Solicitacoes</div>
+    <div class="req-list" id="reqList"></div>
+  </div>
+
+  <!-- PANEL PERFIL -->
+  <div class="panel" id="panel-perfil">
+    <div class="profile-card">
+      <div class="profile-avatar" id="profileAvatar">J</div>
+      <div class="profile-info">
+        <div class="pi-name" id="profileName">Joao Colaborador</div>
+        <div class="pi-role">Desenvolvedor de Software</div>
+        <div class="pi-id">ID: #00247 &bull; Matricula: 10247</div>
+      </div>
+    </div>
+
+    <div class="info-list">
+      <div class="info-item">
+        <div class="ii-icon"><i class="fas fa-building"></i></div>
+        <div>
+          <div class="ii-label">DEPARTAMENTO</div>
+          <div class="ii-value">Tecnologia da Informacao</div>
+        </div>
+        <i class="fas fa-chevron-right ii-arrow"></i>
+      </div>
+      <div class="info-item">
+        <div class="ii-icon"><i class="fas fa-clock"></i></div>
+        <div>
+          <div class="ii-label">TURNO</div>
+          <div class="ii-value">08:00 - 18:00 (Seg-Sex)</div>
+        </div>
+        <i class="fas fa-chevron-right ii-arrow"></i>
+      </div>
+      <div class="info-item">
+        <div class="ii-icon"><i class="fas fa-map-marker-alt"></i></div>
+        <div>
+          <div class="ii-label">UNIDADE</div>
+          <div class="ii-value">Matriz - Campina Grande, PB</div>
+        </div>
+        <i class="fas fa-chevron-right ii-arrow"></i>
+      </div>
+      <div class="info-item">
+        <div class="ii-icon"><i class="fas fa-envelope"></i></div>
+        <div>
+          <div class="ii-label">E-MAIL</div>
+          <div class="ii-value" id="profileEmail">joao@empresa.com</div>
+        </div>
+        <i class="fas fa-chevron-right ii-arrow"></i>
+      </div>
+      <div class="info-item">
+        <div class="ii-icon"><i class="fas fa-shield-alt"></i></div>
+        <div>
+          <div class="ii-label">CONFORMIDADE</div>
+          <div class="ii-value" style="color:var(--green)">Portaria 671/2021 - OK</div>
+        </div>
+        <i class="fas fa-check ii-arrow" style="color:var(--green)"></i>
+      </div>
+    </div>
+
+    <button class="btn-logout" onclick="logout()">
+      <i class="fas fa-sign-out-alt"></i> Sair da Conta
+    </button>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="switchTab('ponto')" id="nav-ponto">
+    <i class="fas fa-fingerprint"></i><span>Ponto</span>
+  </button>
+  <button class="nav-item" onclick="switchTab('historico')" id="nav-historico">
+    <i class="fas fa-calendar-alt"></i><span>Historico</span>
+  </button>
+  <button class="nav-item" onclick="switchTab('solicitacoes')" id="nav-solicitacoes">
+    <i class="fas fa-clipboard-list"></i><span>Pedidos</span>
+  </button>
+  <button class="nav-item" onclick="switchTab('perfil')" id="nav-perfil">
+    <i class="fas fa-user-circle"></i><span>Perfil</span>
+  </button>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <i class="fas t-icon" id="toastIcon"></i>
+  <span id="toastMsg">Mensagem</span>
+</div>
+
+<script>
+  // STATE
+  const MONTHS=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const WEEKDAYS=['Domingo','Segunda-feira','Terca-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sabado'];
+  let workStatus='fora';
+  let todayPunches=[];
+  let currentMonth=3; // abril
+  let currentYear=2026;
+  let requests=[];
+
+  // USER
+  const user=JSON.parse(sessionStorage.getItem('ps_user')||'{"name":"Colaborador","email":"colaborador@email.com"}');
+  document.getElementById('greetName').textContent=user.name||'Colaborador';
+  document.getElementById('profileName').textContent=user.name||'Colaborador';
+  document.getElementById('profileEmail').textContent=user.email||'';
+  document.getElementById('profileAvatar').textContent=(user.name||'C').charAt(0).toUpperCase();
+
+  // CLOCK
+  function updateClock(){
+    const now=new Date();
+    document.getElementById('liveClock').textContent=now.toLocaleTimeString('pt-BR');
+    document.getElementById('liveDate').textContent=WEEKDAYS[now.getDay()]+', '+now.getDate()+' de '+MONTHS[now.getMonth()]+' de '+now.getFullYear();
+    document.getElementById('greetDate').textContent=WEEKDAYS[now.getDay()]+', '+now.getDate()+' de '+MONTHS[now.getMonth()]+' de '+now.getFullYear();
+    document.getElementById('statusTime').textContent=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    // Greeting
+    const h=now.getHours();
+    const greetEl=document.querySelector('.greet-text');
+    if(h<12)greetEl.textContent='Bom dia,';
+    else if(h<18)greetEl.textContent='Boa tarde,';
+    else greetEl.textContent='Boa noite,';
+  }
+  setInterval(updateClock,1000);
+  updateClock();
+
+  // GEOLOCATION
+  function getGeo(){
+    if(!navigator.geolocation){
+      document.getElementById('geoAddr').textContent='Geolocalizacao nao disponivel';
+      document.getElementById('geoBadge').textContent='SEM GPS';
+      document.getElementById('geoBadge').style.background='rgba(239,68,68,.2)';
+      document.getElementById('geoBadge').style.color='#EF4444';
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(pos=>{
+      document.getElementById('geoAddr').textContent='Lat: '+pos.coords.latitude.toFixed(4)+' | Lon: '+pos.coords.longitude.toFixed(4);
+      document.getElementById('geoBadge').textContent='VALIDADO';
+      document.getElementById('geoBadge').style.background='rgba(0,169,79,.25)';
+      document.getElementById('geoBadge').style.color='#00A94F';
+    },err=>{
+      document.getElementById('geoAddr').textContent='Empresa - Campina Grande, PB';
+      document.getElementById('geoBadge').textContent='DEMO';
+    },{timeout:8000});
+  }
+  getGeo();
+
+  // TABS
+  function switchTab(tab){
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+    document.getElementById('panel-'+tab).classList.add('active');
+    document.getElementById('tab-'+tab).classList.add('active');
+    document.getElementById('nav-'+tab).classList.add('active');
+    if(tab==='historico')renderHistory();
+    if(tab==='solicitacoes')renderRequests();
+  }
+
+  // PUNCH
+  const workStates={
+    fora:{label:'Registrar Entrada',icon:'fa-fingerprint',cls:'entrada',statusLabel:'Expediente nao iniciado'},
+    trabalhando:{label:'Registrar Saida',icon:'fa-sign-out-alt',cls:'saida',statusLabel:'Em expediente'},
+    intervalo:{label:'Retornar do Intervalo',icon:'fa-play-circle',cls:'intervalo',statusLabel:'Em intervalo'}
+  };
+
+  function updatePunchBtn(){
+    const s=workStates[workStatus];
+    const btn=document.getElementById('punchBtn');
+    btn.className='punch-btn '+s.cls;
+    btn.querySelector('.btn-label').innerHTML='<i class="fas '+s.icon+'"></i> '+s.label;
+    document.getElementById('statusLabel').textContent=s.statusLabel;
+    document.getElementById('breakStartBtn').disabled=workStatus!=='trabalhando';
+    document.getElementById('breakEndBtn').disabled=workStatus!=='intervalo';
+  }
+
+  function addPunchRecord(type,dot){
+    const now=new Date();
+    todayPunches.push({type,dot,time:now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})});
+  }
+
+  function registrarPonto(){
+    const btn=document.getElementById('punchBtn');
+    btn.classList.add('loading');
+    setTimeout(()=>{
+      btn.classList.remove('loading');
+      if(workStatus==='fora'){
+        addPunchRecord('Entrada','entrada');
+        workStatus='trabalhando';
+      }else if(workStatus==='trabalhando'){
+        addPunchRecord('Saida','saida');
+        workStatus='fora';
+      }else{
+        addPunchRecord('Retorno Intervalo','retorno');
+        workStatus='trabalhando';
+      }
+      updatePunchBtn();
+      renderTimeline();
+      showToast('Ponto registrado com sucesso!','success');
+    },1200);
+  }
+
+  function registrarIntervalo(tipo){
+    if(tipo==='inicio'){
+      if(workStatus!=='trabalhando'){
+        showToast('Inicie o expediente antes de sair para intervalo','error');
+        return;
+      }
+      addPunchRecord('Saida Intervalo','intervalo');
+      workStatus='intervalo';
+      updatePunchBtn();
+      renderTimeline();
+      showToast('Saida para intervalo registrada!','success');
+      return;
+    }
+    if(workStatus!=='intervalo'){
+      showToast('Nao ha intervalo em andamento','error');
+      return;
+    }
+    addPunchRecord('Retorno Intervalo','retorno');
+    workStatus='trabalhando';
+    updatePunchBtn();
+    renderTimeline();
+    showToast('Retorno do intervalo registrado!','success');
+  }
+
+  function renderTimeline(){
+    const tl=document.getElementById('timelineToday');
+    if(todayPunches.length===0){
+      tl.innerHTML='<div class="tl-item"><div class="tl-dot intervalo"><i class="fas fa-clock"></i></div><div class="tl-content"><div class="tl-label">Nenhum registro hoje</div><div class="tl-time">Registre seu ponto acima</div></div></div>';
+      return;
+    }
+    const icons={entrada:'fa-sign-in-alt',saida:'fa-sign-out-alt','Saida Intervalo':'fa-coffee','Retorno Intervalo':'fa-play-circle'};
+    tl.innerHTML=todayPunches.map(p=>`
+      <div class="tl-item">
+        <div class="tl-dot ${p.dot}"><i class="fas ${icons[p.type]||'fa-clock'}"></i></div>
+        <div class="tl-content">
+          <div class="tl-label">${p.type}</div>
+          <div class="tl-time">${p.time}</div>
+        </div>
+        <span class="tl-badge ok">OK</span>
+      </div>
+    `).join('');
+  }
+
+  // HISTORY
+  const demoHistory=[
+    {day:18,wk:'Sex',hours:'8h 15m',punches:'08:02 | 12:00 | 13:05 | 18:17',badge:'ok',badgeTxt:'Normal'},
+    {day:17,wk:'Qui',hours:'9h 05m',punches:'07:55 | 12:00 | 13:00 | 17:00',badge:'extra',badgeTxt:'Hora Extra'},
+    {day:16,wk:'Qua',hours:'8h 00m',punches:'08:01 | 12:00 | 13:00 | 17:01',badge:'ok',badgeTxt:'Normal'},
+    {day:15,wk:'Ter',hours:'7h 48m',punches:'08:14 | 12:00 | 13:02 | 17:04',badge:'inc',badgeTxt:'Atraso'},
+    {day:14,wk:'Seg',hours:'8h 10m',punches:'07:50 | 12:05 | 13:05 | 18:00',badge:'ok',badgeTxt:'Normal'},
+    {day:11,wk:'Sex',hours:'0h 00m',punches:'Atestado medico',badge:'falta',badgeTxt:'Atestado'},
+    {day:10,wk:'Qui',hours:'8h 30m',punches:'07:30 | 12:00 | 13:00 | 17:00',badge:'extra',badgeTxt:'Hora Extra'},
+    {day:9,wk:'Qua',hours:'8h 00m',punches:'08:00 | 12:00 | 13:00 | 17:00',badge:'ok',badgeTxt:'Normal'},
+  ];
+
+  function renderHistory(){
+    const list=document.getElementById('historyList');
+    list.innerHTML=demoHistory.map(h=>`
+      <div class="hist-card">
+        <div class="hist-day"><div class="hd-num">${h.day}</div><div class="hd-wk">${h.wk}</div></div>
+        <div class="hist-divider"></div>
+        <div class="hist-content">
+          <div class="hist-hours">${h.hours}</div>
+          <div class="hist-punches">${h.punches}</div>
+        </div>
+        <span class="hist-badge ${h.badge}">${h.badgeTxt}</span>
+      </div>
+    `).join('');
+  }
+
+  function changeMonth(dir){
+    currentMonth+=dir;
+    if(currentMonth<0){currentMonth=11;currentYear--;}
+    if(currentMonth>11){currentMonth=0;currentYear++;}
+    document.getElementById('monthLabel').textContent=MONTHS[currentMonth]+' '+currentYear;
+  }
+
+  // REQUESTS
+  const demoRequests=[
+    {type:'Correcao de Ponto',date:'15/04/2026',desc:'Esqueci de registrar saida no dia 15',status:'pendente'},
+    {type:'Atestado Medico',date:'11/04/2026',desc:'Consulta medica - CID: Z00.0',status:'aprovado'},
+    {type:'Folga Compensatoria',date:'05/04/2026',desc:'Compensacao de horas extras do mes anterior',status:'negado'},
+  ];
+
+  function renderRequests(){
+    const list=document.getElementById('reqList');
+    const all=[...demoRequests,...requests];
+    if(all.length===0){list.innerHTML='<div style="text-align:center;color:var(--gray-500);font-size:13px;padding:20px">Nenhuma solicitacao ainda</div>';return;}
+    list.innerHTML=all.map(r=>`
+      <div class="req-item">
+        <div class="ri-header">
+          <span class="ri-type">${r.type}</span>
+          <span class="ri-status ${r.status}">${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</span>
+        </div>
+        <div class="ri-desc">${r.desc}</div>
+        <div class="ri-date">${r.date}</div>
+      </div>
+    `).join('');
+  }
+
+  function submitRequest(){
+    const type=document.getElementById('reqType').value;
+    const date=document.getElementById('reqDate').value;
+    const desc=document.getElementById('reqDesc').value;
+    if(!type||!date||!desc){showToast('Preencha todos os campos','error');return;}
+    const d=new Date(date);
+    requests.unshift({type,date:d.toLocaleDateString('pt-BR'),desc,status:'pendente'});
+    document.getElementById('reqType').value='';
+    document.getElementById('reqDate').value='';
+    document.getElementById('reqDesc').value='';
+    renderRequests();
+    showToast('Solicitacao enviada com sucesso!','success');
+  }
+
+  // TOAST
+  function showToast(msg,type='success'){
+    const t=document.getElementById('toast');
+    const icon=document.getElementById('toastIcon');
+    document.getElementById('toastMsg').textContent=msg;
+    t.className='toast '+type;
+    icon.className='fas t-icon '+(type==='success'?'fa-check-circle':'fa-exclamation-circle');
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),3000);
+  }
+
+  // LOGOUT
+  function logout(){
+    sessionStorage.clear();
+    window.location.href='index.html';
+  }
+
+  // INIT
+  updatePunchBtn();
+  renderHistory();
+  renderRequests();
+
+  // Set today date input
+  const td=new Date();
+  document.getElementById('reqDate').value=td.toISOString().split('T')[0];
+</script>
+</body>
+</html>

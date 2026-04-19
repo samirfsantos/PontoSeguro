@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>PontoSeguro - Painel RH</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --navy:#0D2137;--navy-mid:#1B3A5C;--navy-light:#243f5f;
+      --green:#00A94F;--green-light:#00C85A;--green-pale:#E8F9EF;
+      --gray-bg:#F0F4FA;--gray-100:#EFF2F7;--gray-200:#E2E8F0;--gray-300:#CBD5E1;--gray-500:#64748B;--gray-700:#334155;
+      --white:#FFFFFF;--red:#EF4444;--red-pale:#FEF2F2;--amber:#F59E0B;--amber-pale:#FFFBEB;--blue:#3B82F6;--blue-pale:#EFF6FF;
+      --sidebar-w:240px;
+    }
+    html,body{height:100%;font-family:'Inter',sans-serif;background:var(--gray-bg);color:var(--gray-700)}
+
+    /* LAYOUT */
+    .layout{display:flex;height:100vh;overflow:hidden}
+
+    /* SIDEBAR */
+    .sidebar{width:var(--sidebar-w);background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+    .sidebar-logo{padding:24px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .sl-icon{width:40px;height:40px;background:var(--green);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;flex-shrink:0}
+    .sl-text{color:#fff;font-size:18px;font-weight:800;letter-spacing:-.3px}
+    .sl-text span{color:var(--green)}
+    .sl-badge{font-size:9px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.08);border-radius:4px;padding:2px 6px;margin-top:2px;display:block;text-align:center}
+
+    .sidebar-user{padding:20px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .su-avatar{width:42px;height:42px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#fff;margin-bottom:10px}
+    .su-name{color:#fff;font-size:14px;font-weight:600}
+    .su-role{color:rgba(255,255,255,.45);font-size:11px;margin-top:2px}
+
+    .sidebar-nav{flex:1;padding:12px 0}
+    .nav-section{padding:8px 20px 4px;color:rgba(255,255,255,.3);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+    .nav-link{display:flex;align-items:center;gap:12px;padding:11px 20px;color:rgba(255,255,255,.6);font-size:13.5px;font-weight:500;cursor:pointer;transition:all .15s;border-left:3px solid transparent;text-decoration:none}
+    .nav-link i{width:18px;text-align:center;font-size:14px}
+    .nav-link:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9)}
+    .nav-link.active{background:rgba(0,169,79,.15);color:var(--green);border-left-color:var(--green)}
+    .nav-link .badge{margin-left:auto;background:var(--green);color:#fff;border-radius:100px;padding:1px 8px;font-size:10px;font-weight:700}
+    .nav-link .badge.red{background:var(--red)}
+
+    .sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.08)}
+    .sf-link{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.4);font-size:12px;cursor:pointer;transition:color .15s}
+    .sf-link:hover{color:rgba(255,255,255,.7)}
+    .sf-link i{font-size:13px}
+
+    /* MAIN */
+    .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+    /* TOP BAR */
+    .topbar{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 28px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+    .tb-left{display:flex;align-items:center;gap:16px}
+    .tb-page-title{font-size:18px;font-weight:700;color:var(--navy)}
+    .tb-breadcrumb{font-size:12px;color:var(--gray-500)}
+    .tb-right{display:flex;align-items:center;gap:12px}
+    .tb-date{font-size:13px;color:var(--gray-500);background:var(--gray-100);padding:7px 14px;border-radius:8px}
+    .tb-icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--gray-200);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--gray-500);font-size:15px;transition:all .15s;position:relative}
+    .tb-icon-btn:hover{background:var(--gray-100)}
+    .tb-notif-dot{position:absolute;top:7px;right:7px;width:7px;height:7px;background:var(--red);border-radius:50%;border:2px solid var(--white)}
+
+    /* PAGE */
+    .page{flex:1;overflow-y:auto;padding:24px 28px;display:none}
+    .page.active{display:block}
+
+    /* KPI CARDS */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+    .kpi-card{background:var(--white);border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);position:relative;overflow:hidden}
+    .kpi-card::after{content:'';position:absolute;right:-20px;top:-20px;width:80px;height:80px;border-radius:50%;background:currentColor;opacity:.04}
+    .kpi-card .kc-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:14px}
+    .kpi-card .kc-value{font-size:28px;font-weight:800;color:var(--navy);line-height:1}
+    .kpi-card .kc-label{font-size:12px;color:var(--gray-500);margin-top:5px;font-weight:500}
+    .kpi-card .kc-trend{font-size:11px;margin-top:8px;display:flex;align-items:center;gap:4px;font-weight:600}
+    .kpi-card .kc-trend.up{color:var(--green)}
+    .kpi-card .kc-trend.down{color:var(--red)}
+    .kc-icon.green{background:var(--green-pale);color:var(--green)}
+    .kc-icon.amber{background:var(--amber-pale);color:var(--amber)}
+    .kc-icon.red{background:var(--red-pale);color:var(--red)}
+    .kc-icon.blue{background:var(--blue-pale);color:var(--blue)}
+
+    /* GRID */
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+    .grid-3{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:20px}
+
+    /* CARD */
+    .card{background:var(--white);border-radius:16px;padding:22px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .card-title{font-size:14px;font-weight:700;color:var(--navy)}
+    .card-action{font-size:12px;color:var(--green);text-decoration:none;font-weight:500;cursor:pointer;background:none;border:none;font-family:'Inter',sans-serif}
+
+    /* TABLE */
+    table{width:100%;border-collapse:collapse}
+    thead th{font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;padding:8px 12px;text-align:left;border-bottom:1px solid var(--gray-200)}
+    tbody td{padding:13px 12px;font-size:13px;color:var(--gray-700);border-bottom:1px solid var(--gray-100)}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:hover{background:var(--gray-100)}
+
+    /* BADGES */
+    .badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px}
+    .badge.ok{background:var(--green-pale);color:var(--green)}
+    .badge.late{background:var(--amber-pale);color:var(--amber)}
+    .badge.absent{background:var(--red-pale);color:var(--red)}
+    .badge.extra{background:var(--blue-pale);color:var(--blue)}
+    .badge.pending{background:var(--amber-pale);color:var(--amber)}
+    .badge.approved{background:var(--green-pale);color:var(--green)}
+    .badge.rejected{background:var(--red-pale);color:var(--red)}
+    .badge.online{background:var(--green-pale);color:var(--green)}
+    .badge.offline{background:var(--gray-100);color:var(--gray-500)}
+
+    /* AVATAR */
+    .emp-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+
+    /* CHART PLACEHOLDER */
+    .chart-wrap{height:200px;background:linear-gradient(to bottom,var(--gray-100) 0%,var(--white) 100%);border-radius:10px;display:flex;align-items:flex-end;justify-content:space-around;padding:20px 10px 0;gap:8px;overflow:hidden}
+    .chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+    .chart-bar{width:100%;border-radius:6px 6px 0 0;background:var(--green);transition:height .5s ease;min-height:4px}
+    .chart-bar.amber{background:var(--amber)}
+    .chart-bar.red{background:var(--red)}
+    .chart-label{font-size:10px;color:var(--gray-500);font-weight:500}
+
+    /* PROGRESS */
+    .progress-wrap{margin-bottom:14px}
+    .progress-header{display:flex;justify-content:space-between;margin-bottom:6px}
+    .progress-label{font-size:13px;color:var(--gray-700);font-weight:500}
+    .progress-val{font-size:12px;color:var(--gray-500)}
+    .progress-bar{height:8px;background:var(--gray-200);border-radius:100px;overflow:hidden}
+    .progress-fill{height:100%;border-radius:100px;background:var(--green);transition:width .5s}
+    .progress-fill.amber{background:var(--amber)}
+    .progress-fill.red{background:var(--red)}
+
+    /* COMPLIANCE */
+    .compliance-ring{width:120px;height:120px;border-radius:50%;background:conic-gradient(var(--green) 0% 94%,var(--gray-200) 94% 100%);display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0}
+    .compliance-ring::after{content:'';position:absolute;inset:14px;border-radius:50%;background:var(--white)}
+    .compliance-val{position:relative;z-index:1;font-size:22px;font-weight:800;color:var(--navy)}
+    .compliance-info{flex:1}
+    .compliance-info .ci-title{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:8px}
+    .compliance-info .ci-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--gray-700);margin-bottom:6px}
+    .compliance-info .ci-item i{color:var(--green);width:14px}
+    .compliance-info .ci-item.warn i{color:var(--amber)}
+
+    /* BUTTONS */
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:10px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+    .btn-primary{background:var(--green);color:#fff}
+    .btn-primary:hover{background:var(--green-light)}
+    .btn-secondary{background:var(--gray-100);color:var(--gray-700);border:1px solid var(--gray-200)}
+    .btn-secondary:hover{background:var(--gray-200)}
+    .btn-danger{background:var(--red-pale);color:var(--red);border:1px solid #FECACA}
+    .btn-sm{padding:6px 12px;font-size:12px}
+
+    /* EMPLOYEE PAGE */
+    .emp-search-bar{display:flex;gap:12px;margin-bottom:20px}
+    .emp-search{flex:1;position:relative}
+    .emp-search i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gray-500);font-size:14px}
+    .emp-search input{width:100%;border:1.5px solid var(--gray-200);border-radius:10px;padding:11px 14px 11px 42px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-700);outline:none;transition:border-color .2s}
+    .emp-search input:focus{border-color:var(--green)}
+    .filter-select{border:1.5px solid var(--gray-200);border-radius:10px;padding:10px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-700);outline:none;background:var(--white);cursor:pointer}
+
+    .detail-hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);border-radius:18px;padding:24px;color:#fff;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .detail-hero-title{font-size:24px;font-weight:800;margin-bottom:6px}
+    .detail-hero-sub{font-size:13px;color:rgba(255,255,255,.65)}
+    .detail-summary{display:grid;grid-template-columns:repeat(3,minmax(120px,1fr));gap:10px;margin-bottom:20px}
+    .detail-stat{background:var(--white);border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .detail-stat-label{font-size:11px;color:var(--gray-500);font-weight:600;margin-bottom:6px}
+    .detail-stat-value{font-size:18px;color:var(--navy);font-weight:800}
+    .detail-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .detail-field{display:flex;flex-direction:column;gap:6px}
+    .detail-field label{font-size:12px;font-weight:700;color:var(--gray-700)}
+    .detail-field input,.detail-field select,.detail-field textarea{width:100%;border:1.5px solid var(--gray-200);border-radius:12px;padding:12px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-700);outline:none;transition:border-color .2s;background:var(--white)}
+    .detail-field input:focus,.detail-field select:focus,.detail-field textarea:focus{border-color:var(--green)}
+    .detail-field.full{grid-column:1 / -1}
+    .detail-actions{display:flex;justify-content:space-between;gap:12px;margin-top:22px;flex-wrap:wrap}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.show{display:flex}
+    .modal{background:var(--white);border-radius:20px;padding:32px;width:100%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+    .modal-title{font-size:18px;font-weight:700;color:var(--navy)}
+    .modal-close{background:none;border:none;font-size:18px;color:var(--gray-500);cursor:pointer}
+    .modal-form .mf-group{margin-bottom:16px}
+    .modal-form .mf-group label{display:block;font-size:12px;font-weight:600;color:var(--gray-700);margin-bottom:6px}
+    .modal-form .mf-group input,.modal-form .mf-group select,.modal-form .mf-group textarea{width:100%;border:1.5px solid var(--gray-200);border-radius:10px;padding:11px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-700);outline:none;transition:border-color .2s}
+    .modal-form .mf-group input:focus,.modal-form .mf-group select:focus,.modal-form .mf-group textarea:focus{border-color:var(--green)}
+    .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
+    .modal-form .mf-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+    /* REPORT */
+    .report-period{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+    .report-period label{font-size:13px;font-weight:600;color:var(--gray-700)}
+    .report-period input,.report-period select{border:1.5px solid var(--gray-200);border-radius:10px;padding:9px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-700);outline:none}
+    .report-period input:focus,.report-period select:focus{border-color:var(--green)}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:30px;right:30px;background:var(--navy);color:#fff;border-radius:12px;padding:14px 20px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;z-index:999;opacity:0;transform:translateY(20px);transition:all .35s;pointer-events:none}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .toast .t-icon.green{color:var(--green)}
+    .toast .t-icon.red{color:#f87171}
+
+    /* NOTIFICATION PANEL */
+    .notif-panel{position:absolute;top:52px;right:0;width:340px;background:var(--white);border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.15);z-index:200;display:none;border:1px solid var(--gray-200)}
+    .notif-panel.show{display:block}
+    .np-header{padding:16px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between}
+    .np-title{font-size:14px;font-weight:700;color:var(--navy)}
+    .np-item{padding:14px 16px;border-bottom:1px solid var(--gray-100);display:flex;gap:12px;align-items:flex-start}
+    .np-item:last-child{border-bottom:none}
+    .np-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+    .np-dot.green{background:var(--green)}
+    .np-dot.amber{background:var(--amber)}
+    .np-dot.red{background:var(--red)}
+    .np-text{font-size:12px;color:var(--gray-700);line-height:1.5}
+    .np-time{font-size:11px;color:var(--gray-500);margin-top:3px}
+
+    @media(max-width:1100px){
+      .kpi-grid{grid-template-columns:repeat(2,1fr)}
+      .grid-2,.grid-3{grid-template-columns:1fr}
+    }
+    @media(max-width:768px){
+      .sidebar{display:none}
+      .topbar .tb-date{display:none}
+      .detail-form-grid,.detail-summary{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sl-icon"><i class="fas fa-clock"></i></div>
+      <div>
+        <div class="sl-text">Ponto<span>Seguro</span></div>
+        <span class="sl-badge">PAINEL RH</span>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="su-avatar" id="sidebarAvatar">A</div>
+      <div class="su-name" id="sidebarName">Ana Gestora</div>
+      <div class="su-role">Gestora de RH</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">Visao Geral</div>
+      <a class="nav-link active" onclick="goPage('dashboard')"><i class="fas fa-chart-pie"></i> Dashboard</a>
+      <a class="nav-link" onclick="goPage('registros')"><i class="fas fa-fingerprint"></i> Registros de Ponto <span class="badge">12</span></a>
+
+      <div class="nav-section">Gestao</div>
+      <a class="nav-link" onclick="goPage('funcionarios')"><i class="fas fa-users"></i> Funcionarios</a>
+      <a class="nav-link" onclick="goPage('solicitacoes')"><i class="fas fa-clipboard-check"></i> Solicitacoes <span class="badge red">3</span></a>
+      <a class="nav-link" onclick="goPage('atestados')"><i class="fas fa-file-medical"></i> Atestados e Faltas</a>
+      <a class="nav-link" onclick="goPage('banco-horas')"><i class="fas fa-hourglass-half"></i> Banco de Horas</a>
+
+      <div class="nav-section">Relatorios</div>
+      <a class="nav-link" onclick="goPage('relatorios')"><i class="fas fa-chart-bar"></i> Relatorios</a>
+      <a class="nav-link" onclick="goPage('conformidade')"><i class="fas fa-shield-alt"></i> Conformidade 671</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sf-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="tb-left">
+        <span class="tb-page-title" id="pageTitle">Dashboard</span>
+        <span class="tb-breadcrumb" id="pageBreadcrumb">/ Visao Geral</span>
+      </div>
+      <div class="tb-right">
+        <span class="tb-date" id="topbarDate">Segunda, 19 de Abril de 2026</span>
+        <div style="position:relative">
+          <button class="tb-icon-btn" onclick="toggleNotifs()"><i class="fas fa-bell"></i><span class="tb-notif-dot"></span></button>
+          <div class="notif-panel" id="notifPanel">
+            <div class="np-header"><span class="np-title">Notificacoes</span><button class="btn btn-sm btn-secondary" onclick="toggleNotifs()">Fechar</button></div>
+            <div class="np-item"><div class="np-dot red"></div><div><div class="np-text">Carlos Lima nao registrou entrada hoje</div><div class="np-time">Ha 2h</div></div></div>
+            <div class="np-item"><div class="np-dot amber"></div><div><div class="np-text">3 solicitacoes de correcao pendentes</div><div class="np-time">Ha 3h</div></div></div>
+            <div class="np-item"><div class="np-dot green"></div><div><div class="np-text">Relatorio mensal de Abril gerado</div><div class="np-time">Ha 5h</div></div></div>
+            <div class="np-item"><div class="np-dot amber"></div><div><div class="np-text">Mariana Souza com atraso reincidente</div><div class="np-time">Ontem</div></div></div>
+          </div>
+        </div>
+        <button class="tb-icon-btn" onclick="goPage('configuracoes')"><i class="fas fa-cog"></i></button>
+      </div>
+    </header>
+
+    <!-- PAGE: DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kc-icon green"><i class="fas fa-users"></i></div>
+          <div class="kc-value">248</div>
+          <div class="kc-label">Funcionarios Ativos</div>
+          <div class="kc-trend up"><i class="fas fa-arrow-up"></i> +4 este mes</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kc-icon green"><i class="fas fa-fingerprint"></i></div>
+          <div class="kc-value">231</div>
+          <div class="kc-label">Presentes Hoje</div>
+          <div class="kc-trend up"><i class="fas fa-check"></i> 93.1% de presenca</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kc-icon amber"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="kc-value">17</div>
+          <div class="kc-label">Ausencias / Atrasos</div>
+          <div class="kc-trend down"><i class="fas fa-arrow-up"></i> +3 vs ontem</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kc-icon blue"><i class="fas fa-hourglass-half"></i></div>
+          <div class="kc-value">+128h</div>
+          <div class="kc-label">Saldo Banco de Horas</div>
+          <div class="kc-trend up"><i class="fas fa-arrow-up"></i> Equipe este mes</div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <!-- CHART -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title"><i class="fas fa-chart-bar" style="color:var(--green);margin-right:6px"></i>Registros por Dia (Semana Atual)</span>
+            <button class="card-action btn btn-sm btn-secondary" onclick="goPage('relatorios')">Ver mais</button>
+          </div>
+          <div class="chart-wrap" id="weekChart"></div>
+          <div style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gray-500)"><div style="width:10px;height:10px;border-radius:3px;background:var(--green)"></div>Presentes</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gray-500)"><div style="width:10px;height:10px;border-radius:3px;background:var(--amber)"></div>Atrasos</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gray-500)"><div style="width:10px;height:10px;border-radius:3px;background:var(--red)"></div>Ausencias</div>
+          </div>
+        </div>
+
+        <!-- COMPLIANCE -->
+        <div class="card">
+          <div class="card-header"><span class="card-title"><i class="fas fa-shield-alt" style="color:var(--green);margin-right:6px"></i>Conformidade 671</span></div>
+          <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px">
+            <div class="compliance-ring"><span class="compliance-val">94%</span></div>
+            <div class="compliance-info">
+              <div class="ci-title">Portaria 671/2021</div>
+              <div class="ci-item"><i class="fas fa-check-circle"></i> Registro eletronico ativo</div>
+              <div class="ci-item"><i class="fas fa-check-circle"></i> Dados auditaveis</div>
+              <div class="ci-item"><i class="fas fa-check-circle"></i> Comprovantes digitais</div>
+              <div class="ci-item warn"><i class="fas fa-exclamation-circle"></i> 15 registros sem local</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="goPage('conformidade')"><i class="fas fa-file-alt"></i> Ver Relatorio Completo</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- RECENT PUNCHES -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Ultimos Registros</span>
+            <button class="card-action" onclick="goPage('registros')">Ver todos</button>
+          </div>
+          <table>
+            <thead><tr><th>Funcionario</th><th>Tipo</th><th>Horario</th><th>Status</th></tr></thead>
+            <tbody id="recentPunchesBody"></tbody>
+          </table>
+        </div>
+
+        <!-- PENDING -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Solicitacoes Pendentes</span>
+            <button class="card-action" onclick="goPage('solicitacoes')">Ver todas</button>
+          </div>
+          <table>
+            <thead><tr><th>Funcionario</th><th>Tipo</th><th>Data</th><th>Acao</th></tr></thead>
+            <tbody id="pendingReqBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PAGE: REGISTROS -->
+    <div class="page" id="page-registros">
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+        <input type="date" id="filterDate" style="border:1.5px solid var(--gray-200);border-radius:10px;padding:9px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-700);outline:none" />
+        <select style="border:1.5px solid var(--gray-200);border-radius:10px;padding:9px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-700);outline:none;background:var(--white)">
+          <option>Todos os departamentos</option>
+          <option>Tecnologia</option>
+          <option>Comercial</option>
+          <option>Financeiro</option>
+          <option>RH</option>
+        </select>
+        <select style="border:1.5px solid var(--gray-200);border-radius:10px;padding:9px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-700);outline:none;background:var(--white)">
+          <option>Todos os status</option>
+          <option>Normal</option>
+          <option>Atraso</option>
+          <option>Ausencia</option>
+          <option>Hora Extra</option>
+        </select>
+        <button class="btn btn-primary" style="margin-left:auto" onclick="showToast('Relatorio exportado!','green')"><i class="fas fa-download"></i> Exportar</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Registros do Dia</span><span style="font-size:12px;color:var(--gray-500)" id="regCount">248 registros</span></div>
+        <table>
+          <thead><tr><th>Funcionario</th><th>Depto</th><th>Entrada</th><th>Intervalo</th><th>Saida</th><th>Total</th><th>Status</th><th>Local</th></tr></thead>
+          <tbody id="regBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAGE: FUNCIONARIOS -->
+    <div class="page" id="page-funcionarios">
+      <div class="emp-search-bar">
+        <div class="emp-search">
+          <i class="fas fa-search"></i>
+          <input type="text" id="empSearch" placeholder="Buscar funcionario..." oninput="filterEmployees()" />
+        </div>
+        <select class="filter-select" id="empDeptFilter" onchange="filterEmployees()">
+          <option value="">Todos os departamentos</option>
+          <option value="Tecnologia">Tecnologia</option>
+          <option value="Comercial">Comercial</option>
+          <option value="Financeiro">Financeiro</option>
+          <option value="RH">RH</option>
+          <option value="Logistica">Logistica</option>
+        </select>
+        <button class="btn btn-primary" onclick="openAddEmployee()"><i class="fas fa-plus"></i> Novo Funcionario</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Funcionario</th><th>Cargo</th><th>Departamento</th><th>Turno</th><th>Status</th><th>Ultima Entrada</th><th>Acoes</th></tr></thead>
+          <tbody id="empBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page" id="page-funcionario-detalhe">
+      <div class="detail-hero">
+        <div>
+          <div class="detail-hero-title" id="employeeDetailName">Funcionario</div>
+          <div class="detail-hero-sub" id="employeeDetailSub">Atualize os dados cadastrais, jornada e configuracoes do colaborador.</div>
+        </div>
+        <button class="btn btn-secondary" onclick="goPage('funcionarios')"><i class="fas fa-arrow-left"></i> Voltar para lista</button>
+      </div>
+
+      <div class="detail-summary">
+        <div class="detail-stat">
+          <div class="detail-stat-label">STATUS</div>
+          <div class="detail-stat-value" id="employeeDetailStatus">Ativo</div>
+        </div>
+        <div class="detail-stat">
+          <div class="detail-stat-label">ULTIMO REGISTRO</div>
+          <div class="detail-stat-value" id="employeeDetailLastPunch">08:02</div>
+        </div>
+        <div class="detail-stat">
+          <div class="detail-stat-label">MATRICULA</div>
+          <div class="detail-stat-value" id="employeeDetailId">00001</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Dados do Funcionario</span>
+          <span style="font-size:12px;color:var(--gray-500)">Edicao individual</span>
+        </div>
+        <div class="detail-form-grid">
+          <div class="detail-field">
+            <label for="editEmployeeName">Nome completo</label>
+            <input type="text" id="editEmployeeName" />
+          </div>
+          <div class="detail-field">
+            <label for="editEmployeeEmail">E-mail</label>
+            <input type="email" id="editEmployeeEmail" />
+          </div>
+          <div class="detail-field">
+            <label for="editEmployeeRole">Cargo</label>
+            <input type="text" id="editEmployeeRole" />
+          </div>
+          <div class="detail-field">
+            <label for="editEmployeeDept">Departamento</label>
+            <select id="editEmployeeDept"><option>Tecnologia</option><option>Comercial</option><option>Financeiro</option><option>RH</option><option>Logistica</option></select>
+          </div>
+          <div class="detail-field">
+            <label for="editEmployeeShift">Turno</label>
+            <select id="editEmployeeShift"><option>08:00-18:00</option><option>09:00-18:00</option><option>08:00-17:00</option><option>06:00-15:00</option><option>12:00-21:00</option></select>
+          </div>
+          <div class="detail-field">
+            <label for="editEmployeeStatus">Status</label>
+            <select id="editEmployeeStatus"><option value="online">Ativo</option><option value="offline">Ausente</option></select>
+          </div>
+          <div class="detail-field full">
+            <label for="editEmployeeNotes">Observacoes</label>
+            <textarea id="editEmployeeNotes" rows="5" placeholder="Anotacoes internas do RH, regras de jornada, observacoes de cadastro..."></textarea>
+          </div>
+        </div>
+        <div class="detail-actions">
+          <button class="btn btn-secondary" onclick="goPage('funcionarios')"><i class="fas fa-times"></i> Cancelar</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-secondary" onclick="showToast('Historico do funcionario em breve','green')"><i class="fas fa-history"></i> Ver historico</button>
+            <button class="btn btn-primary" onclick="saveEmployeeChanges()"><i class="fas fa-save"></i> Salvar alteracoes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: SOLICITACOES -->
+    <div class="page" id="page-solicitacoes">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Gerenciar Solicitacoes</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary btn-sm" onclick="filterReqs('all')">Todas</button>
+            <button class="btn btn-secondary btn-sm" onclick="filterReqs('pendente')">Pendentes</button>
+            <button class="btn btn-secondary btn-sm" onclick="filterReqs('aprovado')">Aprovadas</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Funcionario</th><th>Tipo</th><th>Data Ref.</th><th>Descricao</th><th>Enviada em</th><th>Status</th><th>Acoes</th></tr></thead>
+          <tbody id="solBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAGE: ATESTADOS -->
+    <div class="page" id="page-atestados">
+      <div style="display:flex;gap:12px;margin-bottom:20px">
+        <button class="btn btn-primary" onclick="showToast('Funcionalidade em breve','green')"><i class="fas fa-plus"></i> Registrar Atestado</button>
+        <button class="btn btn-secondary" onclick="showToast('Relatorio exportado!','green')"><i class="fas fa-download"></i> Exportar</button>
+      </div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+        <div class="kpi-card"><div class="kc-icon red"><i class="fas fa-file-medical"></i></div><div class="kc-value">8</div><div class="kc-label">Atestados este mes</div></div>
+        <div class="kpi-card"><div class="kc-icon amber"><i class="fas fa-calendar-times"></i></div><div class="kc-value">23</div><div class="kc-label">Dias de afastamento</div></div>
+        <div class="kpi-card"><div class="kc-icon blue"><i class="fas fa-check-circle"></i></div><div class="kc-value">6</div><div class="kc-label">Retornos programados</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Atestados e Afastamentos</span></div>
+        <table>
+          <thead><tr><th>Funcionario</th><th>Tipo</th><th>CID</th><th>Inicio</th><th>Fim</th><th>Dias</th><th>Status</th></tr></thead>
+          <tbody id="atestBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAGE: BANCO HORAS -->
+    <div class="page" id="page-banco-horas">
+      <div class="grid-2" style="margin-bottom:20px">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Saldo Geral da Equipe</span></div>
+          <div id="bancoProgress"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Resumo do Banco</span></div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--gray-500)">Total de horas extras</span><span style="font-weight:700;color:var(--green)">+248h 30m</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--gray-500)">Total de horas negativas</span><span style="font-weight:700;color:var(--red)">-42h 15m</span></div>
+            <div style="height:1px;background:var(--gray-200)"></div>
+            <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--navy);font-weight:600">Saldo liquido</span><span style="font-weight:800;color:var(--blue)">+206h 15m</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--gray-500)">Compensacoes no mes</span><span style="font-weight:700;color:var(--amber)">-18h 00m</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Banco de Horas por Funcionario</span>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('Exportando...','green')"><i class="fas fa-download"></i> Exportar</button>
+        </div>
+        <table>
+          <thead><tr><th>Funcionario</th><th>Departamento</th><th>Horas Mes</th><th>Meta</th><th>Saldo</th><th>Status</th></tr></thead>
+          <tbody id="bancoBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAGE: RELATORIOS -->
+    <div class="page" id="page-relatorios">
+      <div class="report-period">
+        <label>Periodo:</label>
+        <input type="date" value="2026-04-01" />
+        <span style="color:var(--gray-500)">ate</span>
+        <input type="date" value="2026-04-19" />
+        <select><option>Todos os departamentos</option><option>Tecnologia</option><option>Comercial</option></select>
+        <button class="btn btn-primary" onclick="showToast('Relatorio gerado!','green')"><i class="fas fa-play"></i> Gerar</button>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Tipos de Relatorio</span></div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--gray-100);border-radius:12px;cursor:pointer" onclick="showToast('Relatorio exportado!','green')">
+              <div style="width:40px;height:40px;border-radius:10px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--green)"><i class="fas fa-chart-line"></i></div>
+              <div><div style="font-size:13px;font-weight:700;color:var(--navy)">Espelho de Ponto Mensal</div><div style="font-size:11px;color:var(--gray-500)">Portaria 671/2021 - Formato oficial</div></div>
+              <i class="fas fa-download" style="margin-left:auto;color:var(--gray-400)"></i>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--gray-100);border-radius:12px;cursor:pointer" onclick="showToast('Relatorio exportado!','green')">
+              <div style="width:40px;height:40px;border-radius:10px;background:var(--blue-pale);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--blue)"><i class="fas fa-hourglass-half"></i></div>
+              <div><div style="font-size:13px;font-weight:700;color:var(--navy)">Banco de Horas Detalhado</div><div style="font-size:11px;color:var(--gray-500)">Saldos positivos e negativos por funcionario</div></div>
+              <i class="fas fa-download" style="margin-left:auto;color:var(--gray-400)"></i>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--gray-100);border-radius:12px;cursor:pointer" onclick="showToast('Relatorio exportado!','green')">
+              <div style="width:40px;height:40px;border-radius:10px;background:var(--amber-pale);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--amber)"><i class="fas fa-calendar-times"></i></div>
+              <div><div style="font-size:13px;font-weight:700;color:var(--navy)">Ausencias e Atrasos</div><div style="font-size:11px;color:var(--gray-500)">Relatorio de faltas com justificativas</div></div>
+              <i class="fas fa-download" style="margin-left:auto;color:var(--gray-400)"></i>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--gray-100);border-radius:12px;cursor:pointer" onclick="showToast('Relatorio exportado!','green')">
+              <div style="width:40px;height:40px;border-radius:10px;background:var(--red-pale);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--red)"><i class="fas fa-file-medical-alt"></i></div>
+              <div><div style="font-size:13px;font-weight:700;color:var(--navy)">Atestados e Afastamentos</div><div style="font-size:11px;color:var(--gray-500)">Historico medico e dias de afastamento</div></div>
+              <i class="fas fa-download" style="margin-left:auto;color:var(--gray-400)"></i>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Indicadores do Periodo</span></div>
+          <div id="relProgress"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: CONFORMIDADE -->
+    <div class="page" id="page-conformidade">
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+        <div class="kpi-card"><div class="kc-icon green"><i class="fas fa-check-circle"></i></div><div class="kc-value">94%</div><div class="kc-label">Indice geral de conformidade</div></div>
+        <div class="kpi-card"><div class="kc-icon amber"><i class="fas fa-exclamation-triangle"></i></div><div class="kc-value">15</div><div class="kc-label">Registros sem geolocalizacao</div></div>
+        <div class="kpi-card"><div class="kc-icon blue"><i class="fas fa-calendar-check"></i></div><div class="kc-value">100%</div><div class="kc-label">Emissao de comprovantes</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Checklist Portaria 671/2021</span></div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--green-pale);border-radius:10px"><i class="fas fa-check-circle" style="color:var(--green);font-size:16px"></i><span style="font-size:13px;font-weight:500">Registro eletronico de ponto ativo (REP-C)</span><span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--green)">OK</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--green-pale);border-radius:10px"><i class="fas fa-check-circle" style="color:var(--green);font-size:16px"></i><span style="font-size:13px;font-weight:500">Comprovante digital emitido a cada registro</span><span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--green)">OK</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--green-pale);border-radius:10px"><i class="fas fa-check-circle" style="color:var(--green);font-size:16px"></i><span style="font-size:13px;font-weight:500">Armazenamento auditavel por 5 anos</span><span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--green)">OK</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--green-pale);border-radius:10px"><i class="fas fa-check-circle" style="color:var(--green);font-size:16px"></i><span style="font-size:13px;font-weight:500">Espelho de ponto disponivel para funcionarios</span><span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--green)">OK</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--amber-pale);border-radius:10px"><i class="fas fa-exclamation-circle" style="color:var(--amber);font-size:16px"></i><span style="font-size:13px;font-weight:500">Geolocalizacao em 100% dos registros</span><span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--amber)">ATENCAO</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--green-pale);border-radius:10px"><i class="fas fa-check-circle" style="color:var(--green);font-size:16px"></i><span style="font-size:13px;font-weight:500">Politica de jornada e horas extras</span><span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--green)">OK</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Alertas de Conformidade</span></div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="padding:14px;background:var(--amber-pale);border:1px solid rgba(245,158,11,.3);border-radius:12px">
+              <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:4px"><i class="fas fa-exclamation-triangle"></i> Registros sem localizacao</div>
+              <div style="font-size:12px;color:var(--gray-700)">15 funcionarios registraram ponto sem geolocalizacao ativa. Solicite que habilitem o GPS.</div>
+            </div>
+            <div style="padding:14px;background:var(--blue-pale);border:1px solid rgba(59,130,246,.3);border-radius:12px">
+              <div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:4px"><i class="fas fa-info-circle"></i> Atualizacao normativa</div>
+              <div style="font-size:12px;color:var(--gray-700)">Sistema atualizado com as normas mais recentes do MTE. Portaria 671 - Art. 74.</div>
+            </div>
+            <div style="padding:14px;background:var(--green-pale);border:1px solid rgba(0,169,79,.3);border-radius:12px">
+              <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px"><i class="fas fa-check-circle"></i> Auditoria aprovada</div>
+              <div style="font-size:12px;color:var(--gray-700)">Ultima auditoria realizada em 01/04/2026 sem irregularidades graves.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL ADD EMPLOYEE -->
+<div class="modal-overlay" id="modalEmployee">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Novo Funcionario</span>
+      <button class="modal-close" onclick="closeModal('modalEmployee')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-form">
+      <div class="mf-row">
+        <div class="mf-group"><label>Nome Completo</label><input type="text" id="newName" placeholder="Nome do funcionario" /></div>
+        <div class="mf-group"><label>E-mail</label><input type="email" id="newEmail" placeholder="email@empresa.com" /></div>
+      </div>
+      <div class="mf-row">
+        <div class="mf-group"><label>Cargo</label><input type="text" id="newCargo" placeholder="Ex: Analista de TI" /></div>
+        <div class="mf-group"><label>Departamento</label>
+          <select id="newDepto"><option>Tecnologia</option><option>Comercial</option><option>Financeiro</option><option>RH</option><option>Logistica</option></select>
+        </div>
+      </div>
+      <div class="mf-row">
+        <div class="mf-group"><label>Turno</label>
+          <select id="newTurno"><option>08:00 - 18:00 (Seg-Sex)</option><option>07:00 - 16:00</option><option>12:00 - 21:00</option><option>Escala 12x36</option></select>
+        </div>
+        <div class="mf-group"><label>Matricula</label><input type="text" id="newMatricula" placeholder="Ex: 00248" /></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalEmployee')">Cancelar</button>
+      <button class="btn btn-primary" onclick="addEmployee()"><i class="fas fa-plus"></i> Cadastrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="rhToast">
+  <i class="fas t-icon" id="rhToastIcon"></i>
+  <span id="rhToastMsg">Mensagem</span>
+</div>
+
+<script>
+  const COLORS=['#00A94F','#3B82F6','#F59E0B','#EF4444','#8B5CF6','#14B8A6','#F97316'];
+  const MONTHS=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const WEEKDAYS=['Domingo','Segunda-feira','Terca-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sabado'];
+
+  // USER
+  const user=JSON.parse(sessionStorage.getItem('ps_user')||'{"name":"Ana Gestora"}');
+  document.getElementById('sidebarName').textContent=user.name||'Gestor RH';
+  document.getElementById('sidebarAvatar').textContent=(user.name||'G').charAt(0).toUpperCase();
+
+  // DATE
+  const now=new Date();
+  document.getElementById('topbarDate').textContent=WEEKDAYS[now.getDay()]+', '+now.getDate()+' de '+MONTHS[now.getMonth()]+' de '+now.getFullYear();
+  const todayStr=now.toISOString().split('T')[0];
+  if(document.getElementById('filterDate'))document.getElementById('filterDate').value=todayStr;
+
+  // PAGES
+  const pageTitles={dashboard:'Dashboard',registros:'Registros de Ponto',funcionarios:'Funcionarios','funcionario-detalhe':'Editar Funcionario',solicitacoes:'Solicitacoes',atestados:'Atestados e Faltas','banco-horas':'Banco de Horas',relatorios:'Relatorios',conformidade:'Conformidade 671'};
+  const pageBread={dashboard:'/ Visao Geral',registros:'/ Controle',funcionarios:'/ Gestao','funcionario-detalhe':'/ Gestao / Edicao individual',solicitacoes:'/ Aprovacoes',atestados:'/ Afastamentos','banco-horas':'/ Saldos',relatorios:'/ Exportar',conformidade:'/ Portaria 671'};
+  let selectedEmployeeId=null;
+
+  function goPage(p){
+    document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(el=>el.classList.remove('active'));
+    const pg=document.getElementById('page-'+p);
+    if(pg)pg.classList.add('active');
+    document.querySelectorAll('.nav-link').forEach(el=>{if(el.getAttribute('onclick')&&el.getAttribute('onclick').includes("'"+p+"'"))el.classList.add('active')});
+    document.getElementById('pageTitle').textContent=pageTitles[p]||p;
+    document.getElementById('pageBreadcrumb').textContent=pageBread[p]||'';
+    if(p==='banco-horas')renderBanco();
+    if(p==='relatorios')renderRelProgress();
+    if(p==='atestados')renderAtestados();
+  }
+
+  // EMPLOYEES DATA
+  let employees=[
+    {id:1,name:'Joao Silva',email:'joao.silva@pontoseguro.com',cargo:'Dev. Full-stack',depto:'Tecnologia',turno:'08:00-18:00',status:'online',ultima:'08:02',notes:'Atua em squad mobile.'},
+    {id:2,name:'Maria Santos',email:'maria.santos@pontoseguro.com',cargo:'Analista de RH',depto:'RH',turno:'08:00-18:00',status:'online',ultima:'07:58',notes:'Responsavel por admissao e folha.'},
+    {id:3,name:'Carlos Lima',email:'carlos.lima@pontoseguro.com',cargo:'Vendedor',depto:'Comercial',turno:'09:00-18:00',status:'offline',ultima:'Ontem 18:05',notes:'Atendimento carteira PMEs.'},
+    {id:4,name:'Ana Costa',email:'ana.costa@pontoseguro.com',cargo:'Analista Financeiro',depto:'Financeiro',turno:'08:00-17:00',status:'online',ultima:'08:10',notes:'Conciliação financeira e faturamento.'},
+    {id:5,name:'Pedro Oliveira',email:'pedro.oliveira@pontoseguro.com',cargo:'Motorista',depto:'Logistica',turno:'06:00-15:00',status:'online',ultima:'06:03',notes:'Rota externa com geolocalizacao obrigatoria.'},
+    {id:6,name:'Mariana Souza',email:'mariana.souza@pontoseguro.com',cargo:'Dev. Backend',depto:'Tecnologia',turno:'08:00-18:00',status:'online',ultima:'08:22',notes:'Atencao com atrasos recorrentes.'},
+    {id:7,name:'Rafael Torres',email:'rafael.torres@pontoseguro.com',cargo:'Designer UX',depto:'Tecnologia',turno:'09:00-18:00',status:'offline',ultima:'Ontem 17:55',notes:'Jornada flexivel aprovada pelo RH.'},
+    {id:8,name:'Juliana Ferreira',email:'juliana.ferreira@pontoseguro.com',cargo:'Coord. Comercial',depto:'Comercial',turno:'08:00-17:00',status:'online',ultima:'08:05',notes:'Lideranca do time comercial.'},
+  ];
+
+  function avatarColor(name){const i=name.charCodeAt(0)%COLORS.length;return COLORS[i]}
+
+  function renderEmployees(list=employees){
+    const body=document.getElementById('empBody');
+    body.innerHTML=list.map(e=>`
+      <tr>
+        <td><div style="display:flex;align-items:center;gap:10px">
+          <div class="emp-avatar" style="background:${avatarColor(e.name)}">${e.name.charAt(0)}</div>
+          <div><div style="font-weight:600">${e.name}</div><div style="font-size:11px;color:var(--gray-500)">${e.id.toString().padStart(5,'0')}</div></div>
+        </div></td>
+        <td>${e.cargo}</td>
+        <td>${e.depto}</td>
+        <td>${e.turno}</td>
+        <td><span class="badge ${e.status}"><i class="fas fa-circle" style="font-size:7px"></i> ${e.status==='online'?'Ativo':'Ausente'}</span></td>
+        <td>${e.ultima}</td>
+        <td><div style="display:flex;gap:6px">
+          <button class="btn btn-secondary btn-sm" onclick="openEmployeeEditor(${e.id})"><i class="fas fa-eye"></i></button>
+          <button class="btn btn-secondary btn-sm" onclick="openEmployeeEditor(${e.id})"><i class="fas fa-edit"></i></button>
+        </div></td>
+      </tr>
+    `).join('');
+  }
+
+  function getEmployeeById(id){
+    return employees.find(e=>e.id===id);
+  }
+
+  function openEmployeeEditor(id){
+    const employee=getEmployeeById(id);
+    if(!employee){
+      showToast('Funcionario nao encontrado','red');
+      return;
+    }
+    selectedEmployeeId=id;
+    document.getElementById('employeeDetailName').textContent=employee.name;
+    document.getElementById('employeeDetailSub').textContent=employee.cargo+' • '+employee.depto;
+    document.getElementById('employeeDetailStatus').textContent=employee.status==='online'?'Ativo':'Ausente';
+    document.getElementById('employeeDetailLastPunch').textContent=employee.ultima;
+    document.getElementById('employeeDetailId').textContent=employee.id.toString().padStart(5,'0');
+    document.getElementById('editEmployeeName').value=employee.name;
+    document.getElementById('editEmployeeEmail').value=employee.email||'';
+    document.getElementById('editEmployeeRole').value=employee.cargo;
+    document.getElementById('editEmployeeDept').value=employee.depto;
+    document.getElementById('editEmployeeShift').value=employee.turno;
+    document.getElementById('editEmployeeStatus').value=employee.status;
+    document.getElementById('editEmployeeNotes').value=employee.notes||'';
+    goPage('funcionario-detalhe');
+  }
+
+  function saveEmployeeChanges(){
+    const employee=getEmployeeById(selectedEmployeeId);
+    if(!employee){
+      showToast('Nenhum funcionario selecionado','red');
+      return;
+    }
+    employee.name=document.getElementById('editEmployeeName').value.trim()||employee.name;
+    employee.email=document.getElementById('editEmployeeEmail').value.trim();
+    employee.cargo=document.getElementById('editEmployeeRole').value.trim()||employee.cargo;
+    employee.depto=document.getElementById('editEmployeeDept').value;
+    employee.turno=document.getElementById('editEmployeeShift').value;
+    employee.status=document.getElementById('editEmployeeStatus').value;
+    employee.notes=document.getElementById('editEmployeeNotes').value.trim();
+    renderEmployees();
+    openEmployeeEditor(employee.id);
+    showToast('Dados de '+employee.name+' atualizados!','green');
+  }
+
+  function filterEmployees(){
+    const q=(document.getElementById('empSearch').value||'').toLowerCase();
+    const d=document.getElementById('empDeptFilter').value;
+    const filtered=employees.filter(e=>(!q||e.name.toLowerCase().includes(q)||e.cargo.toLowerCase().includes(q))&&(!d||e.depto===d));
+    renderEmployees(filtered);
+  }
+
+  function openAddEmployee(){document.getElementById('modalEmployee').classList.add('show')}
+  function closeModal(id){document.getElementById(id).classList.remove('show')}
+  function addEmployee(){
+    const name=document.getElementById('newName').value;
+    if(!name){showToast('Informe o nome','red');return}
+    const e={id:employees.length+1,name,email:document.getElementById('newEmail').value.trim(),cargo:document.getElementById('newCargo').value||'Colaborador',depto:document.getElementById('newDepto').value,turno:document.getElementById('newTurno').value,status:'offline',ultima:'Nunca',notes:''};
+    employees.push(e);
+    renderEmployees();
+    closeModal('modalEmployee');
+    showToast(name+' cadastrado com sucesso!','green');
+  }
+
+  // RECORDS
+  const demoRegs=[
+    {name:'Joao Silva',depto:'TI',entrada:'08:02',inter:'12:00-13:02',saida:'18:05',total:'8h 05m',status:'ok',local:'Validado'},
+    {name:'Maria Santos',depto:'RH',entrada:'07:58',inter:'12:05-13:00',saida:'17:53',total:'7h 55m',status:'late',local:'Validado'},
+    {name:'Ana Costa',depto:'Fin',entrada:'08:10',inter:'12:00-13:00',saida:'17:10',total:'8h 00m',status:'ok',local:'Validado'},
+    {name:'Pedro Oliveira',depto:'Log',entrada:'06:03',inter:'11:00-12:05',saida:'15:00',total:'8h 57m',status:'extra',local:'Validado'},
+    {name:'Mariana Souza',depto:'TI',entrada:'08:22',inter:'12:00-13:00',saida:'18:22',total:'8h 00m',status:'late',local:'Validado'},
+    {name:'Juliana Ferreira',depto:'Com',entrada:'08:05',inter:'12:00-13:00',saida:'17:05',total:'8h 00m',status:'ok',local:'Validado'},
+    {name:'Carlos Lima',depto:'Com',entrada:'-',inter:'-',saida:'-',total:'0h 00m',status:'absent',local:'N/A'},
+    {name:'Rafael Torres',depto:'TI',entrada:'-',inter:'-',saida:'-',total:'0h 00m',status:'absent',local:'N/A'},
+  ];
+  const statusLabels={ok:'Normal',late:'Atraso',absent:'Ausente',extra:'Hora Extra'};
+  function renderRegistros(){
+    const body=document.getElementById('regBody');
+    body.innerHTML=demoRegs.map(r=>`
+      <tr>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="emp-avatar" style="width:28px;height:28px;font-size:11px;background:${avatarColor(r.name)}">${r.name.charAt(0)}</div>${r.name}</div></td>
+        <td>${r.depto}</td>
+        <td style="font-weight:600">${r.entrada}</td>
+        <td style="color:var(--gray-500)">${r.inter}</td>
+        <td style="font-weight:600">${r.saida}</td>
+        <td style="font-weight:700">${r.total}</td>
+        <td><span class="badge ${r.status}">${statusLabels[r.status]}</span></td>
+        <td><span class="badge ${r.local==='Validado'?'ok':'absent'}">${r.local}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  // RECENT PUNCHES (dashboard)
+  const recentPunches=[
+    {name:'Joao Silva',type:'Entrada',time:'08:02',status:'ok'},
+    {name:'Ana Costa',type:'Entrada',time:'08:10',status:'ok'},
+    {name:'Mariana Souza',type:'Entrada',time:'08:22',status:'late'},
+    {name:'Pedro Oliveira',type:'Saida',time:'15:00',status:'ok'},
+    {name:'Maria Santos',type:'Saida Intervalo',time:'12:05',status:'ok'},
+  ];
+  function renderRecentPunches(){
+    document.getElementById('recentPunchesBody').innerHTML=recentPunches.map(p=>`
+      <tr>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="emp-avatar" style="width:28px;height:28px;font-size:11px;background:${avatarColor(p.name)}">${p.name.charAt(0)}</div>${p.name}</div></td>
+        <td>${p.type}</td>
+        <td style="font-weight:600">${p.time}</td>
+        <td><span class="badge ${p.status}">${statusLabels[p.status]||'OK'}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  // SOLICITACOES
+  let solicitacoes=[
+    {name:'Mariana Souza',type:'Correcao de Ponto',dateRef:'15/04/2026',desc:'Saida nao registrada',sent:'18/04/2026',status:'pendente'},
+    {name:'Carlos Lima',type:'Atestado Medico',dateRef:'17/04/2026',desc:'Consulta medica',sent:'18/04/2026',status:'pendente'},
+    {name:'Rafael Torres',type:'Folga Compensatoria',dateRef:'12/04/2026',desc:'Compensacao de horas extras',sent:'16/04/2026',status:'pendente'},
+    {name:'Joao Silva',type:'Correcao de Ponto',dateRef:'10/04/2026',desc:'Entrada com atraso justificado',sent:'11/04/2026',status:'aprovado'},
+    {name:'Ana Costa',type:'Ferias',dateRef:'01/05/2026',desc:'Ferias programadas',sent:'05/04/2026',status:'aprovado'},
+  ];
+  let solFilter='all';
+
+  function filterReqs(f){solFilter=f;renderSolicitacoes()}
+  function renderSolicitacoes(){
+    const filtered=solFilter==='all'?solicitacoes:solicitacoes.filter(s=>s.status===solFilter);
+    document.getElementById('solBody').innerHTML=filtered.map((s,i)=>`
+      <tr>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="emp-avatar" style="width:28px;height:28px;font-size:11px;background:${avatarColor(s.name)}">${s.name.charAt(0)}</div>${s.name}</div></td>
+        <td>${s.type}</td>
+        <td>${s.dateRef}</td>
+        <td style="color:var(--gray-500)">${s.desc}</td>
+        <td>${s.sent}</td>
+        <td><span class="badge ${s.status==='pendente'?'pending':s.status==='aprovado'?'approved':'rejected'}">${s.status.charAt(0).toUpperCase()+s.status.slice(1)}</span></td>
+        <td>
+          ${s.status==='pendente'?`
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-primary btn-sm" onclick="approveReq(${i})"><i class="fas fa-check"></i></button>
+              <button class="btn btn-danger btn-sm" onclick="rejectReq(${i})"><i class="fas fa-times"></i></button>
+            </div>
+          `:'<span style="font-size:12px;color:var(--gray-400)">Concluido</span>'}
+        </td>
+      </tr>
+    `).join('');
+  }
+  function approveReq(i){solicitacoes[i].status='aprovado';renderSolicitacoes();showToast('Solicitacao aprovada!','green')}
+  function rejectReq(i){solicitacoes[i].status='negado';renderSolicitacoes();showToast('Solicitacao negada','red')}
+
+  // PENDING (dashboard)
+  function renderPendingReqs(){
+    const pending=solicitacoes.filter(s=>s.status==='pendente').slice(0,4);
+    document.getElementById('pendingReqBody').innerHTML=pending.map((s,i)=>`
+      <tr>
+        <td>${s.name}</td>
+        <td>${s.type}</td>
+        <td>${s.dateRef}</td>
+        <td><div style="display:flex;gap:6px">
+          <button class="btn btn-primary btn-sm" onclick="approveReq(${i});renderPendingReqs()"><i class="fas fa-check"></i></button>
+          <button class="btn btn-danger btn-sm" onclick="rejectReq(${i});renderPendingReqs()"><i class="fas fa-times"></i></button>
+        </div></td>
+      </tr>
+    `).join('');
+  }
+
+  // ATESTADOS
+  const atestados=[
+    {name:'Carlos Lima',type:'Consulta',cid:'Z00.0',inicio:'17/04',fim:'17/04',dias:1,status:'ok'},
+    {name:'Fernanda Alves',type:'Cirurgia',cid:'K35.2',inicio:'10/04',fim:'20/04',dias:10,status:'absent'},
+    {name:'Roberto Nunes',type:'Exames',cid:'Z01.0',inicio:'15/04',fim:'15/04',dias:1,status:'ok'},
+  ];
+  function renderAtestados(){
+    document.getElementById('atestBody').innerHTML=atestados.map(a=>`
+      <tr>
+        <td>${a.name}</td>
+        <td>${a.type}</td>
+        <td><code style="background:var(--gray-100);padding:2px 6px;border-radius:4px;font-size:12px">${a.cid}</code></td>
+        <td>${a.inicio}</td>
+        <td>${a.fim}</td>
+        <td style="font-weight:700">${a.dias}</td>
+        <td><span class="badge ${a.status==='ok'?'ok':'absent'}">${a.status==='ok'?'Retornou':'Afastado'}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  // BANCO DE HORAS
+  const bancoData=[
+    {name:'Joao Silva',depto:'Tecnologia',horas:'168h 30m',meta:'176h',saldo:'+8h 30m',type:'extra'},
+    {name:'Maria Santos',depto:'RH',horas:'172h 00m',meta:'176h',saldo:'-4h 00m',type:'absent'},
+    {name:'Ana Costa',depto:'Financeiro',horas:'176h 00m',meta:'176h',saldo:'0h 00m',type:'ok'},
+    {name:'Pedro Oliveira',depto:'Logistica',horas:'194h 20m',meta:'176h',saldo:'+18h 20m',type:'extra'},
+    {name:'Mariana Souza',depto:'Tecnologia',horas:'170h 10m',meta:'176h',saldo:'-5h 50m',type:'absent'},
+    {name:'Juliana Ferreira',depto:'Comercial',horas:'179h 00m',meta:'176h',saldo:'+3h 00m',type:'extra'},
+  ];
+  function renderBanco(){
+    document.getElementById('bancoBody').innerHTML=bancoData.map(b=>`
+      <tr>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="emp-avatar" style="width:28px;height:28px;font-size:11px;background:${avatarColor(b.name)}">${b.name.charAt(0)}</div>${b.name}</div></td>
+        <td>${b.depto}</td>
+        <td style="font-weight:600">${b.horas}</td>
+        <td style="color:var(--gray-500)">${b.meta}</td>
+        <td style="font-weight:700;color:${b.type==='extra'?'var(--green)':b.type==='absent'?'var(--red)':'var(--gray-700)'}">${b.saldo}</td>
+        <td><span class="badge ${b.type==='extra'?'extra':b.type==='absent'?'absent':'ok'}">${b.type==='extra'?'Positivo':b.type==='absent'?'Negativo':'Zerado'}</span></td>
+      </tr>
+    `).join('');
+    const bp=document.getElementById('bancoProgress');
+    bp.innerHTML=bancoData.map(b=>{
+      const pct=Math.min(100,Math.round(parseInt(b.horas)*100/176));
+      const cls=pct>100?'green':pct<90?'red':'';
+      return`<div class="progress-wrap"><div class="progress-header"><span class="progress-label">${b.name}</span><span class="progress-val">${b.horas}</span></div><div class="progress-bar"><div class="progress-fill ${cls}" style="width:${Math.min(pct,100)}%"></div></div></div>`;
+    }).join('');
+  }
+
+  // REL PROGRESS
+  function renderRelProgress(){
+    const items=[
+      {label:'Presenca media',val:93,cls:''},
+      {label:'Cumprimento de jornada',val:88,cls:''},
+      {label:'Registros com geolocalizacao',val:94,cls:''},
+      {label:'Solicitacoes resolvidas',val:72,cls:'amber'},
+      {label:'Atestados validados',val:100,cls:''},
+    ];
+    document.getElementById('relProgress').innerHTML=items.map(it=>`
+      <div class="progress-wrap"><div class="progress-header"><span class="progress-label">${it.label}</span><span class="progress-val">${it.val}%</span></div><div class="progress-bar"><div class="progress-fill ${it.cls}" style="width:${it.val}%"></div></div></div>
+    `).join('');
+  }
+
+  // CHART
+  function renderChart(){
+    const data=[
+      {day:'Seg',present:236,late:8,absent:4},
+      {day:'Ter',present:240,late:5,absent:3},
+      {day:'Qua',present:228,late:12,absent:8},
+      {day:'Qui',present:242,late:4,absent:2},
+      {day:'Sex',present:231,late:9,absent:8},
+    ];
+    const max=248;
+    const wrap=document.getElementById('weekChart');
+    wrap.innerHTML=data.map(d=>`
+      <div class="chart-bar-wrap">
+        <div class="chart-bar" style="height:${Math.round(d.present/max*160)}px" title="${d.present} presentes"></div>
+        <div class="chart-bar amber" style="height:${Math.round(d.late/max*160)}px" title="${d.late} atrasos"></div>
+        <div class="chart-bar red" style="height:${Math.round(d.absent/max*160)}px" title="${d.absent} ausentes"></div>
+        <span class="chart-label">${d.day}</span>
+      </div>
+    `).join('');
+  }
+
+  // TOAST
+  function showToast(msg,type='green'){
+    const t=document.getElementById('rhToast');
+    const icon=document.getElementById('rhToastIcon');
+    document.getElementById('rhToastMsg').textContent=msg;
+    icon.className='fas t-icon '+(type==='green'?'fa-check-circle':'fa-exclamation-circle')+' '+type;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),3000);
+  }
+
+  // NOTIFS
+  function toggleNotifs(){document.getElementById('notifPanel').classList.toggle('show')}
+  document.addEventListener('click',e=>{const p=document.getElementById('notifPanel');if(p.classList.contains('show')&&!p.contains(e.target)&&!e.target.closest('button[onclick="toggleNotifs()"]'))p.classList.remove('show')});
+
+  // LOGOUT
+  function logout(){sessionStorage.clear();window.location.href='index.html'}
+
+  // INIT
+  renderEmployees();
+  renderRegistros();
+  renderRecentPunches();
+  renderSolicitacoes();
+  renderPendingReqs();
+  renderChart();
+  renderAtestados();
+</script>
+</body>
+</html>
