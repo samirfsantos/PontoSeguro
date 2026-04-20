@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
 // Aqui diz que o ponto pertence a um funcionario
-      this.belongsTo(models.funcionario, { foreignKey: 'id_funcionario' });    
+      this.belongsTo(models.Funcionario, { foreignKey: 'id_funcionario' });    
       this.belongsTo(models.Empresa, { foreignKey: 'id_empresa' }); }
   }
   RegistroPonto.init({

@@ -4,7 +4,7 @@ require('dotenv').config();
 
 
 //sempre que criar um router, tem que importar ele aqui
-//const routes = require('./routes/routes');
+const routes = require('./routes/routes');
 
 // Importamos o Controller diretamente aqui
 const AuthController = require('./controllers/AuthController');
