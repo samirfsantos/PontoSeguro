@@ -1,7 +1,7 @@
 require('dotenv').config(); // Carrega as variáveis do arquivo .env
 
 module.exports = {
-  // Configurações para o ambiente de desenvolvimento (sua máquina local)
+  // Configurações para o ambiente de desenvolvimento (localhost)
   development: {
     // Se nao configurar o .env, ou se não encontrar ele, vai usar o que está entre as aspas
     username: process.env.DB_USER || 'postgres',

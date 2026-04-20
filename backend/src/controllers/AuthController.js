@@ -1,4 +1,4 @@
-//versao inicial, ainad precisa das demais impementações, como o model de usuário, validação, etc.
+//versao inicial, só um rabujo, ainda precisa das demais impementações, como o model de usuário, validação, etc.
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');

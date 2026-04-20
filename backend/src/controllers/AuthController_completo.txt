@@ -1,0 +1,46 @@
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const { User } = require('../models'); // Importa o modelo de usuário
+
+module.exports = {
+  async login(req, res) {
+    const { email, password } = req.body;
+
+    try {
+      // 1. Busca o usuário pelo e-mail
+      const user = await User.findOne({ where: { email } });
+
+      // 2. Se o usuário não existir, retorna erro
+      if (!user) {
+        return res.status(401).json({ error: 'Usuário não encontrado' });
+      }
+
+      // 3. Verifica se a senha enviada bate com o hash do banco
+      const passwordMatch = await bcrypt.compare(password, user.password_hash);
+
+      if (!passwordMatch) {
+        return res.status(401).json({ error: 'Senha incorreta' });
+      }
+
+      // 4. Se passou por tudo, gera o token dinâmico
+      // O 'id' do usuário vai dentro do token para sabermos quem ele é depois
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+        expiresIn: '1d', // Token expira em 1 dia
+      });
+
+      // 5. Retorno Final Dinâmico
+      return res.json({
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email
+        },
+        token: token
+      });
+
+    } catch (error) {
+      // Tratamento de erro caso o banco de dados falhe
+      return res.status(500).json({ error: 'Erro interno no servidor' });
+    }
+  }
+};
