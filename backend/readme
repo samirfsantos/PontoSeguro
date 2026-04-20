@@ -1,0 +1,290 @@
+# PontoSeguro - Backend API
+
+Sistema completo de registro de ponto eletrônico para gestão de recursos humanos com autenticação segura e controle de frequência de funcionários.
+
+---
+
+## 📋 Descrição do Projeto
+
+PontoSeguro é uma plataforma integrada que oferece:
+- **Autenticação segura** com JWT e hash de senhas (bcrypt)
+- **Gestão de empresas** com múltiplos funcionários
+- **Controle de ponto** em tempo real
+- **APIs RESTful** para integração com web e mobile
+- **Banco de dados PostgreSQL** para confiabilidade
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+| Tecnologia | Versão | Descrição |
+|-----------|--------|-----------|
+| **Node.js** | - | Runtime JavaScript |
+| **Express** | 5.2.1 | Framework web |
+| **Sequelize** | 6.37.8 | ORM para banco de dados |
+| **PostgreSQL** | - | Banco de dados relacional |
+| **JWT** | 9.0.3 | Autenticação por token |
+| **bcryptjs** | 3.0.3 | Hash de senhas |
+| **CORS** | 2.8.6 | Compartilhamento de recursos |
+| **dotenv** | 17.4.2 | Variáveis de ambiente |
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+backend/
+├── src/
+│   ├── app.js                          # Arquivo principal da aplicação
+│   ├── config/
+│   │   └── config.js                   # Configuração do banco de dados
+│   ├── controllers/
+│   │   ├── AuthController.js           # Controle de autenticação (login)
+│   │   └── funcionario.js              # Controle de funcionários
+│   ├── middlewares/                    # Middlewares customizados
+│   ├── migrations/                     # Migrações do Sequelize
+│   │   ├── 20260420014213-create-empresa.js
+│   │   ├── 20260420024959-create-funcionario.js
+│   │   └── 20260420194644-create-registro-ponto.js
+│   ├── models/
+│   │   ├── index.js                    # Configuração dos modelos
+│   │   ├── empresa.js                  # Modelo de Empresa
+│   │   ├── funcionario.js              # Modelo de Funcionário
+│   │   └── registroponto.js            # Modelo de Registro de Ponto
+│   └── routes/
+│       └── routes.js                   # Rotas da API
+├── package.json                        # Dependências do projeto
+└── .env                                # Variáveis de ambiente
+```
+
+---
+
+## 🔧 Pré-requisitos
+
+Antes de começar, certifique-se de ter instalado:
+
+- **Node.js** (v14.0.0 ou superior)
+- **npm** ou **yarn**
+- **PostgreSQL** (v12 ou superior)
+- **Git**
+
+---
+
+## 📦 Instalação
+
+### 1. Clone o repositório
+```bash
+git clone https://github.com/seu-usuario/PontoSeguro.git
+cd PontoSeguro/backend
+```
+
+### 2. Instale as dependências
+```bash
+npm install
+```
+
+### 3. Configure o banco de dados
+Crie um banco de dados PostgreSQL:
+```sql
+CREATE DATABASE pontoseguro;
+```
+
+### 4. Configure as variáveis de ambiente
+Crie um arquivo `.env` na raiz do projeto `backend/`:
+```env
+# Banco de Dados
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_NAME=pontoseguro
+DB_USER=seu_usuario
+DB_PASS=sua_senha
+
+# Aplicação
+PORT=3000
+NODE_ENV=development
+
+# JWT
+JWT_SECRET=sua_chave_secreta_muito_segura
+
+# Render (Produção)
+DATABASE_URL=postgresql://usuario:senha@host:5432/pontoseguro
+```
+
+### 5. Execute as migrações
+```bash
+npx sequelize-cli db:migrate
+```
+
+---
+
+## ▶️ Como Executar
+
+### Modo Desenvolvimento (com auto-reload)
+```bash
+npm run dev
+```
+
+### Modo Produção
+```bash
+npm start
+```
+
+O servidor iniciará em: `http://localhost:3000`
+
+---
+
+## 🔌 Endpoints da API
+
+### 1. Autenticação
+
+#### Login
+- **Método:** `POST`
+- **Rota:** `/login`
+- **Corpo da Requisição:**
+```json
+{
+  "email": "funcionario@example.com",
+  "password": "senha123"
+}
+```
+- **Resposta (Sucesso):**
+```json
+{
+  "user": {
+    "id": 1,
+    "name": "João Silva",
+    "email": "joao@example.com"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+- **Códigos HTTP:**
+  - `200` - Login realizado com sucesso
+  - `401` - Email não encontrado ou senha incorreta
+  - `500` - Erro interno do servidor
+
+---
+
+## 📊 Modelos de Dados
+
+### Empresa
+```javascript
+{
+  id_empresa: Integer (PK),
+  razao_social: String,
+  nome_fantasia: String,
+  cnpj: String,
+  inscricao_estadual: String,
+  endereco: String,
+  cidade: String,
+  estado: String,
+  cep: String,
+  telefone: String,
+  email: String,
+  data_cadastro: Date
+}
+```
+
+### Funcionário
+```javascript
+{
+  id_funcionario: Integer (PK),
+  id_empresa: Integer (FK),
+  nome: String,
+  cpf: String,
+  contato: String,
+  pis_pasep: String,
+  email: String,
+  senha: String (hash bcrypt),
+  cargo: String,
+  salario: Decimal,
+  data_admissao: Date,
+  status: String,
+  data_cadastro: Date,
+  data_atualizacao: Date
+}
+```
+
+### Registro de Ponto
+```javascript
+{
+  id_registro: Integer (PK),
+  id_funcionario: Integer (FK),
+  id_empresa: Integer (FK),
+  data_ponto: Date,
+  hora_entrada: Time,
+  hora_saida: Time,
+  data_cadastro: Date
+}
+```
+
+---
+
+## 🔐 Segurança
+
+- ✅ Senhas criptografadas com bcryptjs
+- ✅ Autenticação JWT com expiração de 1 dia
+- ✅ CORS configurado para aceitar requisições da web e mobile
+- ✅ Variáveis sensíveis armazenadas em `.env`
+- ✅ Prepared statements via Sequelize (proteção contra SQL injection)
+
+---
+
+## 📝 Variáveis de Ambiente
+
+| Variável | Tipo | Descrição | Exemplo |
+|----------|------|-----------|---------|
+| `DB_HOST` | String | Host do banco de dados | 127.0.0.1 |
+| `DB_PORT` | Number | Porta do banco de dados | 5432 |
+| `DB_NAME` | String | Nome do banco de dados | pontoseguro |
+| `DB_USER` | String | Usuário do banco de dados | postgres |
+| `DB_PASS` | String | Senha do banco de dados | senha123 |
+| `PORT` | Number | Porta da aplicação | 3000 |
+| `NODE_ENV` | String | Ambiente | development/production |
+| `JWT_SECRET` | String | Chave secreta JWT | chave_super_secreta_123 |
+
+---
+
+## 🐛 Troubleshooting
+
+### Erro: "Cannot find module '../models'"
+**Solução:** Verifique se o arquivo `src/models/index.js` existe e está exportando os modelos corretamente.
+
+### Erro: "Conexão recusada ao banco de dados"
+**Solução:** 
+- Verifique se PostgreSQL está rodando
+- Confirme as credenciais no `.env`
+- Teste a conexão: `psql -U seu_usuario -d pontoseguro`
+
+### Erro: "JWT inválido"
+**Solução:** Verifique se a chave `JWT_SECRET` é a mesma na geração e verificação do token.
+
+---
+
+## 👨‍💼 Autor
+
+**Samir Santos**
+
+---
+
+## 📄 Licença
+
+ISC
+
+---
+
+## 📞 Suporte
+
+Para dúvidas ou problemas, abra uma issue no repositório ou entre em contato com a equipe de desenvolvimento.
+
+---
+
+## 🚀 Melhorias Futuras
+
+- [ ] Autenticação com 2FA
+- [ ] Rate limiting
+- [ ] Logs estruturados
+- [ ] Testes automatizados
+- [ ] Documentação Swagger/OpenAPI
+- [ ] Cache com Redis
+- [ ] Monitoramento com Sentry
