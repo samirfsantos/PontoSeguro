@@ -240,8 +240,8 @@ RH:
 
 ## Observacoes finais
 
-- Em ambiente de producao, recomenda-se:
   - mover segredos para variaveis de ambiente seguras;
   - usar banco gerenciado (PostgreSQL, por exemplo);
   - habilitar logs estruturados e monitoramento;
   - implementar rate limit e hardening de seguranca na API.
+
