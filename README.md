@@ -244,4 +244,5 @@ RH:
   - usar banco gerenciado (PostgreSQL, por exemplo);
   - habilitar logs estruturados e monitoramento;
   - implementar rate limit e hardening de seguranca na API.
+// Forçando novo deploy na Vercel
 
