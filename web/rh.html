@@ -100,9 +100,9 @@
     /* BADGES */
     .badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px}
     .badge.ok{background:var(--green-pale);color:var(--green)}
-    .badge.late{background:var(--amber-pale);color:var(--amber)}
+    .badge.late{background:var(--red-pale);color:var(--red)}
     .badge.absent{background:var(--red-pale);color:var(--red)}
-    .badge.extra{background:var(--blue-pale);color:var(--blue)}
+    .badge.extra{background:var(--green-pale);color:var(--green)}
     .badge.pending{background:var(--amber-pale);color:var(--amber)}
     .badge.approved{background:var(--green-pale);color:var(--green)}
     .badge.rejected{background:var(--red-pale);color:var(--red)}
@@ -245,12 +245,11 @@
     <nav class="sidebar-nav">
       <div class="nav-section">Visao Geral</div>
       <a class="nav-link active" onclick="goPage('dashboard')"><i class="fas fa-chart-pie"></i> Dashboard</a>
-      <a class="nav-link" onclick="goPage('registros')"><i class="fas fa-fingerprint"></i> Registros de Ponto <span class="badge">12</span></a>
+      <a class="nav-link" onclick="goPage('registros')"><i class="fas fa-fingerprint"></i> Registros da Equipe <span class="badge" id="navRegBadge" style="display:none">0</span></a>
 
       <div class="nav-section">Gestao</div>
       <a class="nav-link" onclick="goPage('funcionarios')"><i class="fas fa-users"></i> Funcionarios</a>
-      <a class="nav-link" onclick="goPage('solicitacoes')"><i class="fas fa-clipboard-check"></i> Solicitacoes <span class="badge red">3</span></a>
-      <a class="nav-link" onclick="goPage('atestados')"><i class="fas fa-file-medical"></i> Atestados e Faltas</a>
+      <a class="nav-link" onclick="goPage('solicitacoes')"><i class="fas fa-clipboard-check"></i> Central de Solicitacoes <span class="badge red" id="navSolBadge" style="display:none">0</span></a>
       <a class="nav-link" onclick="goPage('banco-horas')"><i class="fas fa-hourglass-half"></i> Banco de Horas</a>
 
       <div class="nav-section">Relatorios</div>
@@ -275,13 +274,10 @@
       <div class="tb-right">
         <span class="tb-date" id="topbarDate">Segunda, 19 de Abril de 2026</span>
         <div style="position:relative">
-          <button class="tb-icon-btn" onclick="toggleNotifs()"><i class="fas fa-bell"></i><span class="tb-notif-dot"></span></button>
+          <button class="tb-icon-btn" onclick="toggleNotifs()"><i class="fas fa-bell"></i><span class="tb-notif-dot" id="notifDot" style="display:none"></span></button>
           <div class="notif-panel" id="notifPanel">
             <div class="np-header"><span class="np-title">Notificacoes</span><button class="btn btn-sm btn-secondary" onclick="toggleNotifs()">Fechar</button></div>
-            <div class="np-item"><div class="np-dot red"></div><div><div class="np-text">Carlos Lima nao registrou entrada hoje</div><div class="np-time">Ha 2h</div></div></div>
-            <div class="np-item"><div class="np-dot amber"></div><div><div class="np-text">3 solicitacoes de correcao pendentes</div><div class="np-time">Ha 3h</div></div></div>
-            <div class="np-item"><div class="np-dot green"></div><div><div class="np-text">Relatorio mensal de Abril gerado</div><div class="np-time">Ha 5h</div></div></div>
-            <div class="np-item"><div class="np-dot amber"></div><div><div class="np-text">Mariana Souza com atraso reincidente</div><div class="np-time">Ontem</div></div></div>
+            <div id="notifContent" style="padding:14px 16px;font-size:12px;color:var(--gray-500)">Sem notificacoes pendentes.</div>
           </div>
         </div>
         <button class="tb-icon-btn" onclick="goPage('configuracoes')"><i class="fas fa-cog"></i></button>
@@ -294,27 +290,27 @@
       <div class="kpi-grid">
         <div class="kpi-card">
           <div class="kc-icon green"><i class="fas fa-users"></i></div>
-          <div class="kc-value">248</div>
+          <div class="kc-value" id="kpiAtivos">0</div>
           <div class="kc-label">Funcionarios Ativos</div>
-          <div class="kc-trend up"><i class="fas fa-arrow-up"></i> +4 este mes</div>
+          <div class="kc-trend up" id="kpiAtivosTrend"><i class="fas fa-users"></i> Base atual</div>
         </div>
         <div class="kpi-card">
           <div class="kc-icon green"><i class="fas fa-fingerprint"></i></div>
-          <div class="kc-value">231</div>
+          <div class="kc-value" id="kpiPresentes">0</div>
           <div class="kc-label">Presentes Hoje</div>
-          <div class="kc-trend up"><i class="fas fa-check"></i> 93.1% de presenca</div>
+          <div class="kc-trend up" id="kpiPresentesTrend"><i class="fas fa-check"></i> 0% de presenca</div>
         </div>
         <div class="kpi-card">
           <div class="kc-icon amber"><i class="fas fa-exclamation-triangle"></i></div>
-          <div class="kc-value">17</div>
-          <div class="kc-label">Ausencias / Atrasos</div>
-          <div class="kc-trend down"><i class="fas fa-arrow-up"></i> +3 vs ontem</div>
+          <div class="kc-value" id="kpiPendencias">0</div>
+          <div class="kc-label">Ausencias / Duplicados</div>
+          <div class="kc-trend down" id="kpiPendenciasTrend"><i class="fas fa-clock"></i> Duplicados + sem registro</div>
         </div>
         <div class="kpi-card">
           <div class="kc-icon blue"><i class="fas fa-hourglass-half"></i></div>
-          <div class="kc-value">+128h</div>
+          <div class="kc-value" id="kpiSaldoBanco">0h 00m</div>
           <div class="kc-label">Saldo Banco de Horas</div>
-          <div class="kc-trend up"><i class="fas fa-arrow-up"></i> Equipe este mes</div>
+          <div class="kc-trend up" id="kpiSaldoBancoTrend"><i class="fas fa-hourglass-half"></i> Equipe no mes</div>
         </div>
       </div>
 
@@ -322,13 +318,13 @@
         <!-- CHART -->
         <div class="card">
           <div class="card-header">
-            <span class="card-title"><i class="fas fa-chart-bar" style="color:var(--green);margin-right:6px"></i>Registros por Dia (Semana Atual)</span>
+            <span class="card-title"><i class="fas fa-chart-bar" style="color:var(--green);margin-right:6px"></i>Status de Ponto Hoje</span>
             <button class="card-action btn btn-sm btn-secondary" onclick="goPage('relatorios')">Ver mais</button>
           </div>
           <div class="chart-wrap" id="weekChart"></div>
           <div style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap">
             <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gray-500)"><div style="width:10px;height:10px;border-radius:3px;background:var(--green)"></div>Presentes</div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gray-500)"><div style="width:10px;height:10px;border-radius:3px;background:var(--amber)"></div>Atrasos</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gray-500)"><div style="width:10px;height:10px;border-radius:3px;background:var(--amber)"></div>Duplicados</div>
             <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gray-500)"><div style="width:10px;height:10px;border-radius:3px;background:var(--red)"></div>Ausencias</div>
           </div>
         </div>
@@ -355,10 +351,10 @@
         <div class="card">
           <div class="card-header">
             <span class="card-title">Ultimos Registros</span>
-            <button class="card-action" onclick="goPage('registros')">Ver todos</button>
+            <button class="card-action" id="recentMoreBtn" onclick="toggleRecentList()" style="display:none">Ver mais</button>
           </div>
           <table>
-            <thead><tr><th>Funcionario</th><th>Tipo</th><th>Horario</th><th>Status</th></tr></thead>
+            <thead><tr><th>Funcionario</th><th>Situacao</th><th>Horario</th><th>Status</th></tr></thead>
             <tbody id="recentPunchesBody"></tbody>
           </table>
         </div>
@@ -382,26 +378,26 @@
     <div class="page" id="page-registros">
       <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
         <input type="date" id="filterDate" style="border:1.5px solid var(--gray-200);border-radius:10px;padding:9px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-700);outline:none" />
-        <select style="border:1.5px solid var(--gray-200);border-radius:10px;padding:9px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-700);outline:none;background:var(--white)">
+        <select id="regDeptFilter" style="border:1.5px solid var(--gray-200);border-radius:10px;padding:9px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-700);outline:none;background:var(--white)">
           <option>Todos os departamentos</option>
           <option>Tecnologia</option>
           <option>Comercial</option>
           <option>Financeiro</option>
           <option>RH</option>
         </select>
-        <select style="border:1.5px solid var(--gray-200);border-radius:10px;padding:9px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-700);outline:none;background:var(--white)">
+        <select id="regStatusFilter" style="border:1.5px solid var(--gray-200);border-radius:10px;padding:9px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-700);outline:none;background:var(--white)">
           <option>Todos os status</option>
-          <option>Normal</option>
-          <option>Atraso</option>
-          <option>Ausencia</option>
-          <option>Hora Extra</option>
+          <option>Em Expediente</option>
+          <option>Ausencia de Ponto</option>
+          <option>Ponto Duplicado</option>
         </select>
-        <button class="btn btn-primary" style="margin-left:auto" onclick="showToast('Relatorio exportado!','green')"><i class="fas fa-download"></i> Exportar</button>
+        <button class="btn btn-secondary" onclick="filtrarRegistrosComData()"><i class="fas fa-filter"></i> Filtrar</button>
+        <button class="btn btn-primary" style="margin-left:auto" onclick="downloadPdf('/reports/pontos.pdf')"><i class="fas fa-download"></i> Exportar</button>
       </div>
       <div class="card">
-        <div class="card-header"><span class="card-title">Registros do Dia</span><span style="font-size:12px;color:var(--gray-500)" id="regCount">248 registros</span></div>
+        <div class="card-header"><span class="card-title">Registros do Dia</span><span style="font-size:12px;color:var(--gray-500)" id="regCount">0 registros</span></div>
         <table>
-          <thead><tr><th>Funcionario</th><th>Depto</th><th>Entrada</th><th>Intervalo</th><th>Saida</th><th>Total</th><th>Status</th><th>Local</th></tr></thead>
+          <thead><tr><th>Funcionario</th><th>Depto</th><th>Sequencia do Dia</th><th>Entrada</th><th>Intervalo</th><th>Fim do Intervalo</th><th>Saida</th><th>Total</th><th>Saldo</th><th>Horas (N/E/A)</th></tr></thead>
           <tbody id="regBody"></tbody>
         </table>
       </div>
@@ -422,6 +418,7 @@
           <option value="RH">RH</option>
           <option value="Logistica">Logistica</option>
         </select>
+        <button class="btn btn-secondary" onclick="filterEmployees()"><i class="fas fa-filter"></i> Filtrar</button>
         <button class="btn btn-primary" onclick="openAddEmployee()"><i class="fas fa-plus"></i> Novo Funcionario</button>
       </div>
       <div class="card">
@@ -471,6 +468,10 @@
             <input type="email" id="editEmployeeEmail" />
           </div>
           <div class="detail-field">
+            <label for="editEmployeeCpf">CPF</label>
+            <input type="text" id="editEmployeeCpf" readonly />
+          </div>
+          <div class="detail-field">
             <label for="editEmployeeRole">Cargo</label>
             <input type="text" id="editEmployeeRole" />
           </div>
@@ -504,15 +505,26 @@
     <!-- PAGE: SOLICITACOES -->
     <div class="page" id="page-solicitacoes">
       <div class="card">
-        <div class="card-header"><span class="card-title">Gerenciar Solicitacoes</span>
+        <div class="card-header"><span class="card-title">Central de Solicitacoes e Atestados</span>
           <div style="display:flex;gap:8px">
             <button class="btn btn-secondary btn-sm" onclick="filterReqs('all')">Todas</button>
             <button class="btn btn-secondary btn-sm" onclick="filterReqs('pendente')">Pendentes</button>
             <button class="btn btn-secondary btn-sm" onclick="filterReqs('aprovado')">Aprovadas</button>
+            <button class="btn btn-secondary btn-sm" onclick="filterReqs('negado')">Negadas</button>
           </div>
         </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" onclick="setCentralTipo('all')">Todos</button>
+          <button class="btn btn-secondary btn-sm" onclick="setCentralTipo('solicitacao')">Solicitacoes</button>
+          <button class="btn btn-secondary btn-sm" onclick="setCentralTipo('atestado')">Atestados</button>
+          <span style="font-size:12px;color:var(--gray-500)">Fluxo unificado para reduzir a navegacao do RH.</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">
+          <input id="solSearch" type="text" placeholder="Buscar por funcionario ou descricao" style="flex:1;border:1.5px solid var(--gray-200);border-radius:10px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:13px" />
+          <button class="btn btn-secondary btn-sm" onclick="renderSolicitacoes()"><i class="fas fa-filter"></i> Filtrar</button>
+        </div>
         <table>
-          <thead><tr><th>Funcionario</th><th>Tipo</th><th>Data Ref.</th><th>Descricao</th><th>Enviada em</th><th>Status</th><th>Acoes</th></tr></thead>
+          <thead><tr><th>Origem</th><th>Funcionario</th><th>Tipo</th><th>Data Ref.</th><th>Descricao</th><th>Enviada em</th><th>Status</th><th>Acoes</th></tr></thead>
           <tbody id="solBody"></tbody>
         </table>
       </div>
@@ -521,18 +533,28 @@
     <!-- PAGE: ATESTADOS -->
     <div class="page" id="page-atestados">
       <div style="display:flex;gap:12px;margin-bottom:20px">
-        <button class="btn btn-primary" onclick="showToast('Funcionalidade em breve','green')"><i class="fas fa-plus"></i> Registrar Atestado</button>
-        <button class="btn btn-secondary" onclick="showToast('Relatorio exportado!','green')"><i class="fas fa-download"></i> Exportar</button>
+        <button class="btn btn-primary" onclick="carregarAtestados()"><i class="fas fa-rotate"></i> Atualizar lista</button>
+        <button class="btn btn-secondary" onclick="aplicarFiltroAtestados()"><i class="fas fa-filter"></i> Filtrar</button>
+        <button class="btn btn-secondary" onclick="downloadPdf('/reports/atestados.pdf')"><i class="fas fa-download"></i> Exportar</button>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">
+        <input id="atestSearch" type="text" placeholder="Buscar funcionario" style="flex:1;border:1.5px solid var(--gray-200);border-radius:10px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:13px" />
+        <select id="atestStatusFilter" style="border:1.5px solid var(--gray-200);border-radius:10px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:13px;background:#fff">
+          <option value="all">Todos os status</option>
+          <option value="pendente">Pendente</option>
+          <option value="aprovado">Aprovado</option>
+          <option value="negado">Negado</option>
+        </select>
       </div>
       <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
-        <div class="kpi-card"><div class="kc-icon red"><i class="fas fa-file-medical"></i></div><div class="kc-value">8</div><div class="kc-label">Atestados este mes</div></div>
-        <div class="kpi-card"><div class="kc-icon amber"><i class="fas fa-calendar-times"></i></div><div class="kc-value">23</div><div class="kc-label">Dias de afastamento</div></div>
-        <div class="kpi-card"><div class="kc-icon blue"><i class="fas fa-check-circle"></i></div><div class="kc-value">6</div><div class="kc-label">Retornos programados</div></div>
+        <div class="kpi-card"><div class="kc-icon red"><i class="fas fa-file-medical"></i></div><div class="kc-value" id="kpiAtestadosMes">0</div><div class="kc-label">Atestados no mes</div></div>
+        <div class="kpi-card"><div class="kc-icon amber"><i class="fas fa-calendar-times"></i></div><div class="kc-value" id="kpiAtestadosPendentes">0</div><div class="kc-label">Atestados pendentes</div></div>
+        <div class="kpi-card"><div class="kc-icon blue"><i class="fas fa-check-circle"></i></div><div class="kc-value" id="kpiAtestadosAprovados">0</div><div class="kc-label">Atestados aprovados</div></div>
       </div>
       <div class="card">
         <div class="card-header"><span class="card-title">Atestados e Afastamentos</span></div>
         <table>
-          <thead><tr><th>Funcionario</th><th>Tipo</th><th>CID</th><th>Inicio</th><th>Fim</th><th>Dias</th><th>Status</th></tr></thead>
+          <thead><tr><th>Funcionario</th><th>Descricao</th><th>Data</th><th>Arquivo</th><th>Status</th><th>Acoes</th></tr></thead>
           <tbody id="atestBody"></tbody>
         </table>
       </div>
@@ -540,6 +562,10 @@
 
     <!-- PAGE: BANCO HORAS -->
     <div class="page" id="page-banco-horas">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">
+        <input id="bancoSearch" type="text" placeholder="Buscar funcionario" style="flex:1;border:1.5px solid var(--gray-200);border-radius:10px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:13px" />
+        <button class="btn btn-secondary" onclick="carregarBancoHoras()"><i class="fas fa-filter"></i> Filtrar</button>
+      </div>
       <div class="grid-2" style="margin-bottom:20px">
         <div class="card">
           <div class="card-header"><span class="card-title">Saldo Geral da Equipe</span></div>
@@ -548,17 +574,17 @@
         <div class="card">
           <div class="card-header"><span class="card-title">Resumo do Banco</span></div>
           <div style="display:flex;flex-direction:column;gap:14px">
-            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--gray-500)">Total de horas extras</span><span style="font-weight:700;color:var(--green)">+248h 30m</span></div>
-            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--gray-500)">Total de horas negativas</span><span style="font-weight:700;color:var(--red)">-42h 15m</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--gray-500)">Total de horas extras</span><span id="bancoTotalExtras" style="font-weight:700;color:var(--green)">+0h 00m</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--gray-500)">Total de horas negativas</span><span id="bancoTotalNegativas" style="font-weight:700;color:var(--red)">-0h 00m</span></div>
             <div style="height:1px;background:var(--gray-200)"></div>
-            <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--navy);font-weight:600">Saldo liquido</span><span style="font-weight:800;color:var(--blue)">+206h 15m</span></div>
-            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--gray-500)">Compensacoes no mes</span><span style="font-weight:700;color:var(--amber)">-18h 00m</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--navy);font-weight:600">Saldo liquido</span><span id="bancoSaldoLiquido" style="font-weight:800;color:var(--blue)">0h 00m</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--gray-500)">Compensacoes no mes</span><span id="bancoCompensacoes" style="font-weight:700;color:var(--amber)">0h 00m</span></div>
           </div>
         </div>
       </div>
       <div class="card">
         <div class="card-header"><span class="card-title">Banco de Horas por Funcionario</span>
-          <button class="btn btn-secondary btn-sm" onclick="showToast('Exportando...','green')"><i class="fas fa-download"></i> Exportar</button>
+          <button class="btn btn-secondary btn-sm" onclick="downloadPdf('/reports/pontos.pdf')"><i class="fas fa-download"></i> Exportar</button>
         </div>
         <table>
           <thead><tr><th>Funcionario</th><th>Departamento</th><th>Horas Mes</th><th>Meta</th><th>Saldo</th><th>Status</th></tr></thead>
@@ -581,22 +607,22 @@
         <div class="card">
           <div class="card-header"><span class="card-title">Tipos de Relatorio</span></div>
           <div style="display:flex;flex-direction:column;gap:10px">
-            <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--gray-100);border-radius:12px;cursor:pointer" onclick="showToast('Relatorio exportado!','green')">
+            <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--gray-100);border-radius:12px;cursor:pointer" onclick="downloadPdf('/reports/pontos.pdf')">
               <div style="width:40px;height:40px;border-radius:10px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--green)"><i class="fas fa-chart-line"></i></div>
               <div><div style="font-size:13px;font-weight:700;color:var(--navy)">Espelho de Ponto Mensal</div><div style="font-size:11px;color:var(--gray-500)">Portaria 671/2021 - Formato oficial</div></div>
               <i class="fas fa-download" style="margin-left:auto;color:var(--gray-400)"></i>
             </div>
-            <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--gray-100);border-radius:12px;cursor:pointer" onclick="showToast('Relatorio exportado!','green')">
+            <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--gray-100);border-radius:12px;cursor:pointer" onclick="downloadPdf('/reports/pontos.pdf')">
               <div style="width:40px;height:40px;border-radius:10px;background:var(--blue-pale);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--blue)"><i class="fas fa-hourglass-half"></i></div>
               <div><div style="font-size:13px;font-weight:700;color:var(--navy)">Banco de Horas Detalhado</div><div style="font-size:11px;color:var(--gray-500)">Saldos positivos e negativos por funcionario</div></div>
               <i class="fas fa-download" style="margin-left:auto;color:var(--gray-400)"></i>
             </div>
-            <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--gray-100);border-radius:12px;cursor:pointer" onclick="showToast('Relatorio exportado!','green')">
+            <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--gray-100);border-radius:12px;cursor:pointer" onclick="downloadPdf('/reports/solicitacoes.pdf')">
               <div style="width:40px;height:40px;border-radius:10px;background:var(--amber-pale);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--amber)"><i class="fas fa-calendar-times"></i></div>
               <div><div style="font-size:13px;font-weight:700;color:var(--navy)">Ausencias e Atrasos</div><div style="font-size:11px;color:var(--gray-500)">Relatorio de faltas com justificativas</div></div>
               <i class="fas fa-download" style="margin-left:auto;color:var(--gray-400)"></i>
             </div>
-            <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--gray-100);border-radius:12px;cursor:pointer" onclick="showToast('Relatorio exportado!','green')">
+            <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--gray-100);border-radius:12px;cursor:pointer" onclick="downloadPdf('/reports/atestados.pdf')">
               <div style="width:40px;height:40px;border-radius:10px;background:var(--red-pale);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--red)"><i class="fas fa-file-medical-alt"></i></div>
               <div><div style="font-size:13px;font-weight:700;color:var(--navy)">Atestados e Afastamentos</div><div style="font-size:11px;color:var(--gray-500)">Historico medico e dias de afastamento</div></div>
               <i class="fas fa-download" style="margin-left:auto;color:var(--gray-400)"></i>
@@ -606,6 +632,22 @@
         <div class="card">
           <div class="card-header"><span class="card-title">Indicadores do Periodo</span></div>
           <div id="relProgress"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-configuracoes">
+      <div class="card" style="max-width:860px">
+        <div class="card-header"><span class="card-title">Configuracoes Gerais</span></div>
+        <div class="detail-form-grid">
+          <div class="detail-field"><label>Razao social</label><input id="cfgRazao" type="text" placeholder="Empresa Exemplo LTDA" /></div>
+          <div class="detail-field"><label>CNPJ</label><input id="cfgCnpj" type="text" placeholder="00.000.000/0001-00" /></div>
+          <div class="detail-field"><label>Jornada padrao</label><input id="cfgJornada" type="text" value="08:00-17:00" /></div>
+          <div class="detail-field"><label>E-mail RH</label><input id="cfgEmailRh" type="email" placeholder="rh@empresa.com" /></div>
+          <div class="detail-field full"><label>Endereco da empresa</label><input id="cfgEndereco" type="text" placeholder="Rua, numero, cidade" /></div>
+        </div>
+        <div class="detail-actions">
+          <button class="btn btn-primary" onclick="salvarConfiguracoes()"><i class="fas fa-save"></i> Salvar configuracoes</button>
         </div>
       </div>
     </div>
@@ -674,7 +716,7 @@
         <div class="mf-group"><label>Turno</label>
           <select id="newTurno"><option>08:00 - 18:00 (Seg-Sex)</option><option>07:00 - 16:00</option><option>12:00 - 21:00</option><option>Escala 12x36</option></select>
         </div>
-        <div class="mf-group"><label>Matricula</label><input type="text" id="newMatricula" placeholder="Ex: 00248" /></div>
+        <div class="mf-group"><label>CPF</label><input type="text" id="newMatricula" maxlength="14" placeholder="000.000.000-00" /></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -690,117 +732,390 @@
   <span id="rhToastMsg">Mensagem</span>
 </div>
 
+<div class="modal-overlay" id="modalBancoDetalhe">
+  <div class="modal" style="max-width:760px">
+    <div class="modal-header">
+      <span class="modal-title" id="bancoDetalheTitulo">Detalhes do Banco de Horas</span>
+      <button class="modal-close" onclick="closeModal('modalBancoDetalhe')"><i class="fas fa-times"></i></button>
+    </div>
+    <table>
+      <thead><tr><th>Dia</th><th>Entrada</th><th>Saida</th><th>Horas Trabalhadas</th><th>Saldo do Dia</th></tr></thead>
+      <tbody id="bancoDetalheBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalRegDetalhe">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <span class="modal-title" id="regDetalheTitulo">Detalhes do Registro</span>
+      <button class="modal-close" onclick="closeModal('modalRegDetalhe')"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="regDetalheResumo" style="font-size:13px;color:var(--gray-700);margin-bottom:10px"></div>
+    <table>
+      <thead><tr><th>Evento</th><th>Horario</th><th>Acoes</th></tr></thead>
+      <tbody id="regDetalheBody"></tbody>
+    </table>
+    <div style="margin-top:12px;padding:10px;border:1px solid var(--gray-200);border-radius:10px;background:var(--gray-100)">
+      <div style="font-size:12px;color:var(--gray-500);margin-bottom:8px">Adicionar batida faltante</div>
+      <div style="display:grid;grid-template-columns:1fr 130px auto;gap:8px;align-items:end">
+        <div>
+          <label style="display:block;font-size:12px;color:var(--gray-500);margin-bottom:4px">Tipo</label>
+          <select id="regNovoTipo" style="width:100%;border:1px solid var(--gray-200);border-radius:8px;padding:8px 10px;background:#fff;font-size:13px;color:var(--gray-700)">
+            <option value="entrada">Entrada</option>
+            <option value="intervalo_saida">Inicio intervalo</option>
+            <option value="intervalo_retorno">Fim intervalo</option>
+            <option value="saida">Saida</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;color:var(--gray-500);margin-bottom:4px">Horario</label>
+          <input type="text" id="regNovoHorario" inputmode="numeric" maxlength="5" placeholder="HH:mm" style="width:100%;border:1px solid var(--gray-200);border-radius:8px;padding:8px 10px;background:#fff;font-size:13px;color:var(--gray-700)" />
+        </div>
+        <button type="button" class="btn btn-primary" onclick="adicionarPontoManualDetalhe()"><i class="fas fa-plus"></i> Incluir</button>
+      </div>
+      <div style="margin-top:8px">
+        <label style="display:block;font-size:12px;color:var(--gray-500);margin-bottom:4px">Justificativa da inclusao</label>
+        <textarea id="regNovoJustificativa" rows="2" placeholder="Descreva o motivo da inclusao deste ponto" style="width:100%;border:1px solid var(--gray-200);border-radius:8px;padding:8px 10px;background:#fff;font-size:13px;color:var(--gray-700)"></textarea>
+      </div>
+    </div>
+    <div style="margin-top:12px;padding:10px;border:1px solid var(--gray-200);border-radius:10px;background:#fff">
+      <div style="font-size:12px;color:var(--gray-500);margin-bottom:8px">Historico de alteracoes do dia</div>
+      <div id="regAuditTrail" style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--gray-700)">
+        <div style="padding:8px;border:1px solid var(--gray-200);border-radius:8px;background:var(--gray-100)">Sem alteracoes registradas neste dispositivo.</div>
+      </div>
+    </div>
+    <div style="margin-top:8px;font-size:12px;color:var(--gray-500)">Edite tipo e horario de uma batida pelo botao de lapis.</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalEditarPonto" style="z-index:650">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <span class="modal-title">Editar Batida</span>
+      <button class="modal-close" onclick="fecharModalEditarPonto()"><i class="fas fa-times"></i></button>
+    </div>
+    <div style="display:grid;gap:12px">
+      <div>
+        <label style="display:block;font-size:12px;color:var(--gray-500);margin-bottom:4px">Tipo da batida</label>
+        <select id="editPontoTipo" style="width:100%;border:1px solid var(--gray-200);border-radius:10px;padding:10px 12px;background:#fff;font-size:13px;color:var(--gray-700)">
+          <option value="entrada">Entrada</option>
+          <option value="intervalo_saida">Inicio intervalo</option>
+          <option value="intervalo_retorno">Fim intervalo</option>
+          <option value="saida">Saida</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="display:block;font-size:12px;color:var(--gray-500);margin-bottom:4px">Horario atual</label>
+          <input type="text" id="editPontoHorarioAtual" readonly style="width:100%;border:1px solid var(--gray-200);border-radius:10px;padding:10px 12px;background:var(--gray-100);font-size:13px;color:var(--gray-700)" />
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;color:var(--gray-500);margin-bottom:4px">Novo horario</label>
+          <input type="text" id="editPontoHorarioNovo" inputmode="numeric" maxlength="5" placeholder="HH:mm" style="width:100%;border:1px solid var(--gray-200);border-radius:10px;padding:10px 12px;background:#fff;font-size:13px;color:var(--gray-700)" />
+        </div>
+      </div>
+      <div>
+        <label style="display:block;font-size:12px;color:var(--gray-500);margin-bottom:4px">Justificativa da alteracao</label>
+        <textarea id="editPontoJustificativa" rows="2" placeholder="Descreva o motivo da edicao ou exclusao" style="width:100%;border:1px solid var(--gray-200);border-radius:10px;padding:10px 12px;background:#fff;font-size:13px;color:var(--gray-700)"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer" style="margin-top:16px">
+      <button type="button" class="btn btn-danger" onclick="excluirBatidaEditada()"><i class="fas fa-trash"></i> Excluir batida</button>
+      <button type="button" class="btn btn-secondary" onclick="fecharModalEditarPonto()">Cancelar</button>
+      <button type="button" class="btn btn-primary" onclick="salvarEdicaoPonto()"><i class="fas fa-save"></i> Salvar alteracao</button>
+    </div>
+  </div>
+</div>
+
 <script>
+  const API_URL=localStorage.getItem('ps_api_url')||'http://localhost:3001';
   const COLORS=['#00A94F','#3B82F6','#F59E0B','#EF4444','#8B5CF6','#14B8A6','#F97316'];
   const MONTHS=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const WEEKDAYS=['Domingo','Segunda-feira','Terca-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sabado'];
 
-  // USER
-  const user=JSON.parse(sessionStorage.getItem('ps_user')||'{"name":"Ana Gestora"}');
+  const token=sessionStorage.getItem('ps_token');
+  const user=JSON.parse(sessionStorage.getItem('ps_user')||'{}');
+  if(!token){ window.location.href='index.html'; }
+
+  let employees=[];
+  let solicitacoes=[];
+  let atestados=[];
+  let dashboardRows=[];
+  let solFilter='all';
+  let selectedEmployeeId=null;
+  let dashboardSnapshot=null;
+  let selectedRegistroFuncionarioId=null;
+  let selectedRegistroData='';
+  let dashboardShowAll=false;
+  let editPontoRegistroId=null;
+  let selectedRegistroFuncionarioNome='';
+  let centralTipoFilter='all';
+  const registrosSequenciaCache={};
+
+  function onlyDigits(value=''){return String(value).replace(/\D/g,'');}
+  function formatCpf(value=''){const d=onlyDigits(value).slice(0,11);return d.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');}
+  function formatDateInputLocal(dateValue){
+    const d=dateValue?new Date(dateValue):new Date();
+    const y=d.getFullYear();
+    const m=String(d.getMonth()+1).padStart(2,'0');
+    const day=String(d.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+day;
+  }
+
+  function avatarColor(name){const i=name.charCodeAt(0)%COLORS.length;return COLORS[i];}
+
+  function durationToMinutes(value){
+    const raw=String(value||'0h 00m').trim();
+    if(/^[-+]?\d{1,2}:\d{2}$/.test(raw)){
+      const sign=raw.startsWith('-')?-1:1;
+      const clean=raw.replace(/^[-+]/,'');
+      const parts=clean.split(':');
+      return sign*((Number(parts[0])*60)+Number(parts[1]));
+    }
+    const sign=raw.startsWith('-')?-1:1;
+    const clean=raw.replace(/^[-+]/,'');
+    const h=Number((clean.match(/(\d+)h/)||[])[1]||0);
+    const m=Number((clean.match(/(\d+)m/)||[])[1]||0);
+    return sign*((h*60)+m);
+  }
+
+  function minutesToDuration(total){
+    const sign=total<0?'-':'+';
+    const abs=Math.abs(total);
+    const h=Math.floor(abs/60);
+    const m=abs%60;
+    return `${sign}${h}h ${String(m).padStart(2,'0')}m`;
+  }
+
+  async function api(path,options={}){
+    const resp=await fetch(API_URL+path,{...options,headers:{'Content-Type':'application/json',...(options.headers||{}),Authorization:'Bearer '+token}});
+    if(!resp.ok){
+      let msg='Falha na requisicao';
+      try{const d=await resp.json();msg=d.error||msg;}catch{}
+      throw new Error(msg);
+    }
+    const ct=resp.headers.get('content-type')||'';
+    if(ct.includes('application/json')) return resp.json();
+    return resp;
+  }
+
   document.getElementById('sidebarName').textContent=user.name||'Gestor RH';
   document.getElementById('sidebarAvatar').textContent=(user.name||'G').charAt(0).toUpperCase();
 
-  // DATE
   const now=new Date();
   document.getElementById('topbarDate').textContent=WEEKDAYS[now.getDay()]+', '+now.getDate()+' de '+MONTHS[now.getMonth()]+' de '+now.getFullYear();
-  const todayStr=now.toISOString().split('T')[0];
-  if(document.getElementById('filterDate'))document.getElementById('filterDate').value=todayStr;
+  document.getElementById('filterDate').value=formatDateInputLocal(now);
 
-  // PAGES
-  const pageTitles={dashboard:'Dashboard',registros:'Registros de Ponto',funcionarios:'Funcionarios','funcionario-detalhe':'Editar Funcionario',solicitacoes:'Solicitacoes',atestados:'Atestados e Faltas','banco-horas':'Banco de Horas',relatorios:'Relatorios',conformidade:'Conformidade 671'};
-  const pageBread={dashboard:'/ Visao Geral',registros:'/ Controle',funcionarios:'/ Gestao','funcionario-detalhe':'/ Gestao / Edicao individual',solicitacoes:'/ Aprovacoes',atestados:'/ Afastamentos','banco-horas':'/ Saldos',relatorios:'/ Exportar',conformidade:'/ Portaria 671'};
-  let selectedEmployeeId=null;
+  const pageTitles={dashboard:'Dashboard',registros:'Registros de Ponto',funcionarios:'Funcionarios','funcionario-detalhe':'Editar Funcionario',solicitacoes:'Central de Solicitacoes','banco-horas':'Banco de Horas',relatorios:'Relatorios',configuracoes:'Configuracoes',conformidade:'Conformidade 671'};
+  const pageBread={dashboard:'/ Visao Geral',registros:'/ Controle',funcionarios:'/ Gestao','funcionario-detalhe':'/ Gestao / Edicao individual',solicitacoes:'/ Aprovacoes', 'banco-horas':'/ Saldos',relatorios:'/ Exportar',configuracoes:'/ Sistema',conformidade:'/ Portaria 671'};
+
+  function getRegistroSeenKey(data){
+    const dateRef=(data?.data_referencia||document.getElementById('filterDate').value||formatDateInputLocal(new Date()));
+    return 'ps_rh_seen_batidas_'+dateRef;
+  }
+
+  function getUnreadRegistrosCount(data){
+    const totalBatidas=Number(data?.total_batidas||0);
+    const seen=Number(localStorage.getItem(getRegistroSeenKey(data))||0);
+    return Math.max(0,totalBatidas-seen);
+  }
+
+  function markRegistrosAsVistos(data){
+    const totalBatidas=Number(data?.total_batidas||0);
+    localStorage.setItem(getRegistroSeenKey(data), String(totalBatidas));
+  }
 
   function goPage(p){
     document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
     document.querySelectorAll('.nav-link').forEach(el=>el.classList.remove('active'));
     const pg=document.getElementById('page-'+p);
     if(pg)pg.classList.add('active');
-    document.querySelectorAll('.nav-link').forEach(el=>{if(el.getAttribute('onclick')&&el.getAttribute('onclick').includes("'"+p+"'"))el.classList.add('active')});
+    document.querySelectorAll('.nav-link').forEach(el=>{if((el.getAttribute('onclick')||'').includes("'"+p+"'"))el.classList.add('active');});
     document.getElementById('pageTitle').textContent=pageTitles[p]||p;
     document.getElementById('pageBreadcrumb').textContent=pageBread[p]||'';
-    if(p==='banco-horas')renderBanco();
-    if(p==='relatorios')renderRelProgress();
-    if(p==='atestados')renderAtestados();
+
+    if(p==='funcionarios') renderEmployees();
+    if(p==='solicitacoes') renderSolicitacoes();
+    if(p==='banco-horas') carregarBancoHoras();
+    if(p==='registros'){
+      markRegistrosAsVistos(dashboardSnapshot);
+      aplicarFiltroRegistros();
+      updateSideBadges(dashboardSnapshot);
+      renderNotificacoes(dashboardSnapshot);
+    }
   }
 
-  // EMPLOYEES DATA
-  let employees=[
-    {id:1,name:'Joao Silva',email:'joao.silva@pontoseguro.com',cargo:'Dev. Full-stack',depto:'Tecnologia',turno:'08:00-18:00',status:'online',ultima:'08:02',notes:'Atua em squad mobile.'},
-    {id:2,name:'Maria Santos',email:'maria.santos@pontoseguro.com',cargo:'Analista de RH',depto:'RH',turno:'08:00-18:00',status:'online',ultima:'07:58',notes:'Responsavel por admissao e folha.'},
-    {id:3,name:'Carlos Lima',email:'carlos.lima@pontoseguro.com',cargo:'Vendedor',depto:'Comercial',turno:'09:00-18:00',status:'offline',ultima:'Ontem 18:05',notes:'Atendimento carteira PMEs.'},
-    {id:4,name:'Ana Costa',email:'ana.costa@pontoseguro.com',cargo:'Analista Financeiro',depto:'Financeiro',turno:'08:00-17:00',status:'online',ultima:'08:10',notes:'Conciliação financeira e faturamento.'},
-    {id:5,name:'Pedro Oliveira',email:'pedro.oliveira@pontoseguro.com',cargo:'Motorista',depto:'Logistica',turno:'06:00-15:00',status:'online',ultima:'06:03',notes:'Rota externa com geolocalizacao obrigatoria.'},
-    {id:6,name:'Mariana Souza',email:'mariana.souza@pontoseguro.com',cargo:'Dev. Backend',depto:'Tecnologia',turno:'08:00-18:00',status:'online',ultima:'08:22',notes:'Atencao com atrasos recorrentes.'},
-    {id:7,name:'Rafael Torres',email:'rafael.torres@pontoseguro.com',cargo:'Designer UX',depto:'Tecnologia',turno:'09:00-18:00',status:'offline',ultima:'Ontem 17:55',notes:'Jornada flexivel aprovada pelo RH.'},
-    {id:8,name:'Juliana Ferreira',email:'juliana.ferreira@pontoseguro.com',cargo:'Coord. Comercial',depto:'Comercial',turno:'08:00-17:00',status:'online',ultima:'08:05',notes:'Lideranca do time comercial.'},
-  ];
+  function updateSideBadges(data){
+    const regBadge=document.getElementById('navRegBadge');
+    const solBadge=document.getElementById('navSolBadge');
+    const unreadReg=getUnreadRegistrosCount(data);
 
-  function avatarColor(name){const i=name.charCodeAt(0)%COLORS.length;return COLORS[i]}
+    if(unreadReg>0){
+      regBadge.style.display='inline-flex';
+      regBadge.textContent=String(unreadReg);
+    }else{
+      regBadge.style.display='none';
+    }
+
+    const pend=solicitacoes.filter(s=>s.status==='pendente').length;
+    const atestPend=(atestados||[]).filter(a=>a.status==='pendente').length;
+    const totalPend=pend+atestPend;
+    if(totalPend>0){
+      solBadge.style.display='inline-flex';
+      solBadge.textContent=String(totalPend);
+    }else{
+      solBadge.style.display='none';
+    }
+  }
+
+  function setCentralTipo(tipo){
+    centralTipoFilter=tipo;
+    renderSolicitacoes();
+  }
+
+  function renderNotificacoes(data){
+    const content=document.getElementById('notifContent');
+    const dot=document.getElementById('notifDot');
+    const items=[];
+    const emExp=(data?.colaboradores||[]).filter(c=>c.status==='em_expediente');
+    const semReg=(data?.colaboradores||[]).filter(c=>c.status==='ausencia_ponto');
+    const duplicados=(data?.colaboradores||[]).filter(c=>c.status==='ponto_duplicado');
+    const pend=solicitacoes.filter(s=>s.status==='pendente');
+    const pendAtest=(atestados||[]).filter(a=>a.status==='pendente');
+    const unreadReg=getUnreadRegistrosCount(data);
+
+    if(unreadReg>0){
+      items.push(`<div class=\"np-item\"><div class=\"np-dot blue\"></div><div><div class=\"np-text\">${unreadReg} nova(s) batida(s) de ponto</div><div class=\"np-time\">Acesse Registros da Equipe para marcar como visto</div></div></div>`);
+    }
+
+    if(semReg.length>0){
+      items.push(`<div class=\"np-item\"><div class=\"np-dot red\"></div><div><div class=\"np-text\">${semReg.length} colaborador(es) sem ponto hoje</div><div class=\"np-time\">Atualizado agora</div></div></div>`);
+    }
+    if(emExp.length>0){
+      items.push(`<div class=\"np-item\"><div class=\"np-dot blue\"></div><div><div class=\"np-text\">${emExp.length} colaborador(es) em expediente</div><div class=\"np-time\">Atualizado agora</div></div></div>`);
+    }
+    if(duplicados.length>0){
+      items.push(`<div class=\"np-item\"><div class=\"np-dot amber\"></div><div><div class=\"np-text\">${duplicados.length} colaborador(es) com ponto duplicado</div><div class=\"np-time\">Revisar no dashboard</div></div></div>`);
+    }
+    if(pend.length>0){
+      items.push(`<div class=\"np-item\"><div class=\"np-dot amber\"></div><div><div class=\"np-text\">${pend.length} solicitacao(oes) pendente(s)</div><div class=\"np-time\">Atualizado agora</div></div></div>`);
+    }
+    if(pendAtest.length>0){
+      items.push(`<div class=\"np-item\"><div class=\"np-dot red\"></div><div><div class=\"np-text\">${pendAtest.length} atestado(s) pendente(s)</div><div class=\"np-time\">Atualizado agora</div></div></div>`);
+    }
+
+    if(items.length===0){
+      dot.style.display='none';
+      content.innerHTML='<div style="padding:4px 0">Sem notificacoes pendentes.</div>';
+      return;
+    }
+    dot.style.display='block';
+    content.innerHTML=items.join('');
+  }
+
+  function rowStatusStyle(status){
+    if(status==='ausencia_ponto') return 'background:#FEF2F2';
+    if(status==='ponto_duplicado') return 'background:#FFF7E6';
+    if(status==='em_expediente') return 'background:#E8F9EF';
+    return 'background:#FFFFFF';
+  }
+
+  function statusBadge(status){
+    if(status==='ponto_duplicado') return '<span class="badge pending">Ponto duplicado</span>';
+    if(status==='em_expediente') return '<span class="badge ok">Em expediente</span>';
+    return '<span class="badge absent">Ausencia de ponto</span>';
+  }
+
+  function getSituacaoLabel(c){
+    if(c.status==='ponto_duplicado') return 'Ponto duplicado';
+    if(c.status==='em_expediente') return 'Em expediente';
+    return 'Ausencia de ponto';
+  }
+
+  function renderRecentList(data){
+    const all=data?.colaboradores||[];
+    const list=dashboardShowAll?all:all.slice(0,5);
+    const btn=document.getElementById('recentMoreBtn');
+    if(all.length>5){
+      btn.style.display='inline-flex';
+      btn.textContent=dashboardShowAll?'Mostrar menos':'Ver mais';
+    }else{
+      btn.style.display='none';
+    }
+
+    document.getElementById('recentPunchesBody').innerHTML=list.map(c=>`<tr><td><div style="display:flex;align-items:center;gap:8px"><div class="emp-avatar" style="width:28px;height:28px;font-size:11px;background:${avatarColor(c.nome)}">${c.nome.charAt(0)}</div>${c.nome}</div></td><td>${getSituacaoLabel(c)}</td><td style="font-weight:600">${c.hora_ponto}</td><td>${statusBadge(c.status)}</td></tr>`).join('');
+  }
+
+  function toggleRecentList(){
+    dashboardShowAll=!dashboardShowAll;
+    renderRecentList(dashboardSnapshot);
+  }
+
+  function resumoHorasBadge(c){
+    const normal=c.horas_normais||'0h 00m';
+    const extra=c.horas_extras||'0h 00m';
+    const atraso=c.atraso||'0h 00m';
+    return `<div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge ok" title="Horas normais">N: ${normal}</span><span class="badge extra" title="Hora extra">E: ${extra}</span><span class="badge ${atraso.startsWith('-')?'absent':'pending'}" title="Atraso">A: ${atraso}</span></div>`;
+  }
+
+  async function carregarDashboard(selectedDate){
+    const date=(selectedDate||document.getElementById('filterDate').value||'').trim();
+    const suffix=date?('?date='+encodeURIComponent(date)):'';
+    const data=await api('/rh/dashboard'+suffix);
+    dashboardSnapshot=data;
+    dashboardRows=data.colaboradores||[];
+    if(document.getElementById('page-registros').classList.contains('active')){
+      markRegistrosAsVistos(data);
+    }
+    document.getElementById('topbarDate').textContent='Hoje: '+data.data_atual+' - '+data.hora_atual;
+
+    const total=data.colaboradores.length;
+    const presentes=data.colaboradores.filter(c=>c.status==='em_expediente').length;
+    const duplicados=data.colaboradores.filter(c=>c.status==='ponto_duplicado').length;
+    const semRegistro=data.colaboradores.filter(c=>c.status==='ausencia_ponto').length;
+
+    document.getElementById('kpiAtivos').textContent=String(total);
+    document.getElementById('kpiPresentes').textContent=String(presentes);
+    document.getElementById('kpiPendencias').textContent=String(duplicados+semRegistro);
+    document.getElementById('kpiPresentesTrend').innerHTML='<i class="fas fa-check"></i> '+(total?((presentes/total)*100).toFixed(1):'0.0')+'% de presenca';
+    document.getElementById('kpiPendenciasTrend').innerHTML='<i class="fas fa-clock"></i> '+duplicados+' duplicados e '+semRegistro+' ausencias';
+
+    aplicarFiltroRegistros();
+    updateSideBadges(data);
+    renderNotificacoes(data);
+
+    renderRecentList(data);
+    renderChart();
+  }
+
+  async function filtrarRegistrosComData(){
+    try{
+      await carregarDashboard(document.getElementById('filterDate').value);
+      aplicarFiltroRegistros();
+    }catch(err){
+      showToast(err.message,'red');
+    }
+  }
+
+  async function carregarFuncionarios(){
+    const rows=await api('/rh/funcionarios');
+    employees=rows.map(r=>({
+      id:r.id_funcionario,
+      name:r.nome,
+      email:r.email||'',
+      cpf:r.cpf||'',
+      cargo:r.cargo||'Colaborador',
+      depto:r.departamento||'Geral',
+      turno:r.jornada||'08:00-17:00',
+      status:r.status||'ativo'
+    }));
+    renderEmployees();
+  }
 
   function renderEmployees(list=employees){
     const body=document.getElementById('empBody');
-    body.innerHTML=list.map(e=>`
-      <tr>
-        <td><div style="display:flex;align-items:center;gap:10px">
-          <div class="emp-avatar" style="background:${avatarColor(e.name)}">${e.name.charAt(0)}</div>
-          <div><div style="font-weight:600">${e.name}</div><div style="font-size:11px;color:var(--gray-500)">${e.id.toString().padStart(5,'0')}</div></div>
-        </div></td>
-        <td>${e.cargo}</td>
-        <td>${e.depto}</td>
-        <td>${e.turno}</td>
-        <td><span class="badge ${e.status}"><i class="fas fa-circle" style="font-size:7px"></i> ${e.status==='online'?'Ativo':'Ausente'}</span></td>
-        <td>${e.ultima}</td>
-        <td><div style="display:flex;gap:6px">
-          <button class="btn btn-secondary btn-sm" onclick="openEmployeeEditor(${e.id})"><i class="fas fa-eye"></i></button>
-          <button class="btn btn-secondary btn-sm" onclick="openEmployeeEditor(${e.id})"><i class="fas fa-edit"></i></button>
-        </div></td>
-      </tr>
-    `).join('');
-  }
-
-  function getEmployeeById(id){
-    return employees.find(e=>e.id===id);
-  }
-
-  function openEmployeeEditor(id){
-    const employee=getEmployeeById(id);
-    if(!employee){
-      showToast('Funcionario nao encontrado','red');
-      return;
-    }
-    selectedEmployeeId=id;
-    document.getElementById('employeeDetailName').textContent=employee.name;
-    document.getElementById('employeeDetailSub').textContent=employee.cargo+' • '+employee.depto;
-    document.getElementById('employeeDetailStatus').textContent=employee.status==='online'?'Ativo':'Ausente';
-    document.getElementById('employeeDetailLastPunch').textContent=employee.ultima;
-    document.getElementById('employeeDetailId').textContent=employee.id.toString().padStart(5,'0');
-    document.getElementById('editEmployeeName').value=employee.name;
-    document.getElementById('editEmployeeEmail').value=employee.email||'';
-    document.getElementById('editEmployeeRole').value=employee.cargo;
-    document.getElementById('editEmployeeDept').value=employee.depto;
-    document.getElementById('editEmployeeShift').value=employee.turno;
-    document.getElementById('editEmployeeStatus').value=employee.status;
-    document.getElementById('editEmployeeNotes').value=employee.notes||'';
-    goPage('funcionario-detalhe');
-  }
-
-  function saveEmployeeChanges(){
-    const employee=getEmployeeById(selectedEmployeeId);
-    if(!employee){
-      showToast('Nenhum funcionario selecionado','red');
-      return;
-    }
-    employee.name=document.getElementById('editEmployeeName').value.trim()||employee.name;
-    employee.email=document.getElementById('editEmployeeEmail').value.trim();
-    employee.cargo=document.getElementById('editEmployeeRole').value.trim()||employee.cargo;
-    employee.depto=document.getElementById('editEmployeeDept').value;
-    employee.turno=document.getElementById('editEmployeeShift').value;
-    employee.status=document.getElementById('editEmployeeStatus').value;
-    employee.notes=document.getElementById('editEmployeeNotes').value.trim();
-    renderEmployees();
-    openEmployeeEditor(employee.id);
-    showToast('Dados de '+employee.name+' atualizados!','green');
+    body.innerHTML=list.map(e=>`<tr><td><div style="display:flex;align-items:center;gap:10px"><div class="emp-avatar" style="background:${avatarColor(e.name)}">${e.name.charAt(0)}</div><div><div style="font-weight:600">${e.name}</div><div style="font-size:11px;color:var(--gray-500)">${e.id.toString().padStart(5,'0')}</div></div></div></td><td>${e.cargo}</td><td>${e.depto}</td><td>${e.turno}</td><td><span class="badge ${e.status==='ativo'?'online':'offline'}"><i class="fas fa-circle" style="font-size:7px"></i> ${e.status==='ativo'?'Ativo':'Inativo'}</span></td><td>-</td><td><div style="display:flex;gap:6px"><button class="btn btn-secondary btn-sm" onclick="openEmployeeEditor(${e.id})"><i class="fas fa-edit"></i></button></div></td></tr>`).join('');
   }
 
   function filterEmployees(){
@@ -810,200 +1125,552 @@
     renderEmployees(filtered);
   }
 
-  function openAddEmployee(){document.getElementById('modalEmployee').classList.add('show')}
-  function closeModal(id){document.getElementById(id).classList.remove('show')}
-  function addEmployee(){
-    const name=document.getElementById('newName').value;
-    if(!name){showToast('Informe o nome','red');return}
-    const e={id:employees.length+1,name,email:document.getElementById('newEmail').value.trim(),cargo:document.getElementById('newCargo').value||'Colaborador',depto:document.getElementById('newDepto').value,turno:document.getElementById('newTurno').value,status:'offline',ultima:'Nunca',notes:''};
-    employees.push(e);
-    renderEmployees();
-    closeModal('modalEmployee');
-    showToast(name+' cadastrado com sucesso!','green');
+  function openAddEmployee(){document.getElementById('modalEmployee').classList.add('show');}
+  function closeModal(id){document.getElementById(id).classList.remove('show');}
+
+  async function addEmployee(){
+    const nome=document.getElementById('newName').value.trim();
+    const email=document.getElementById('newEmail').value.trim();
+    const cargo=document.getElementById('newCargo').value.trim();
+    const departamento=document.getElementById('newDepto').value;
+    const cpf=onlyDigits(document.getElementById('newMatricula').value);
+    const jornada=(document.getElementById('newTurno').value||'08:00 - 18:00').replace(' (Seg-Sex)','').replace(/\s/g,'');
+    if(!nome||!cpf){ return showToast('Nome e CPF sao obrigatorios','red'); }
+    if(cpf.length!==11){ return showToast('CPF deve conter 11 numeros','red'); }
+
+    try{
+      await api('/rh/funcionarios',{method:'POST',body:JSON.stringify({nome,email,cargo,departamento,cpf,jornada,perfil:'colaborador'})});
+      closeModal('modalEmployee');
+      await carregarFuncionarios();
+      showToast('Funcionario cadastrado!','green');
+    }catch(err){
+      showToast(err.message,'red');
+    }
   }
 
-  // RECORDS
-  const demoRegs=[
-    {name:'Joao Silva',depto:'TI',entrada:'08:02',inter:'12:00-13:02',saida:'18:05',total:'8h 05m',status:'ok',local:'Validado'},
-    {name:'Maria Santos',depto:'RH',entrada:'07:58',inter:'12:05-13:00',saida:'17:53',total:'7h 55m',status:'late',local:'Validado'},
-    {name:'Ana Costa',depto:'Fin',entrada:'08:10',inter:'12:00-13:00',saida:'17:10',total:'8h 00m',status:'ok',local:'Validado'},
-    {name:'Pedro Oliveira',depto:'Log',entrada:'06:03',inter:'11:00-12:05',saida:'15:00',total:'8h 57m',status:'extra',local:'Validado'},
-    {name:'Mariana Souza',depto:'TI',entrada:'08:22',inter:'12:00-13:00',saida:'18:22',total:'8h 00m',status:'late',local:'Validado'},
-    {name:'Juliana Ferreira',depto:'Com',entrada:'08:05',inter:'12:00-13:00',saida:'17:05',total:'8h 00m',status:'ok',local:'Validado'},
-    {name:'Carlos Lima',depto:'Com',entrada:'-',inter:'-',saida:'-',total:'0h 00m',status:'absent',local:'N/A'},
-    {name:'Rafael Torres',depto:'TI',entrada:'-',inter:'-',saida:'-',total:'0h 00m',status:'absent',local:'N/A'},
-  ];
-  const statusLabels={ok:'Normal',late:'Atraso',absent:'Ausente',extra:'Hora Extra'};
-  function renderRegistros(){
-    const body=document.getElementById('regBody');
-    body.innerHTML=demoRegs.map(r=>`
-      <tr>
-        <td><div style="display:flex;align-items:center;gap:8px"><div class="emp-avatar" style="width:28px;height:28px;font-size:11px;background:${avatarColor(r.name)}">${r.name.charAt(0)}</div>${r.name}</div></td>
-        <td>${r.depto}</td>
-        <td style="font-weight:600">${r.entrada}</td>
-        <td style="color:var(--gray-500)">${r.inter}</td>
-        <td style="font-weight:600">${r.saida}</td>
-        <td style="font-weight:700">${r.total}</td>
-        <td><span class="badge ${r.status}">${statusLabels[r.status]}</span></td>
-        <td><span class="badge ${r.local==='Validado'?'ok':'absent'}">${r.local}</span></td>
-      </tr>
-    `).join('');
+  function openEmployeeEditor(id){
+    const employee=employees.find(e=>e.id===id);
+    if(!employee) return showToast('Funcionario nao encontrado','red');
+    selectedEmployeeId=id;
+    document.getElementById('employeeDetailName').textContent=employee.name;
+    document.getElementById('employeeDetailSub').textContent=employee.cargo+' • '+employee.depto;
+    document.getElementById('employeeDetailStatus').textContent=employee.status==='ativo'?'Ativo':'Inativo';
+    document.getElementById('employeeDetailLastPunch').textContent='-';
+    document.getElementById('employeeDetailId').textContent=employee.id.toString().padStart(5,'0');
+    document.getElementById('editEmployeeName').value=employee.name;
+    document.getElementById('editEmployeeEmail').value=employee.email;
+    document.getElementById('editEmployeeCpf').value=employee.cpf||'';
+    document.getElementById('editEmployeeRole').value=employee.cargo;
+    document.getElementById('editEmployeeDept').value=employee.depto;
+    document.getElementById('editEmployeeShift').value=employee.turno;
+    document.getElementById('editEmployeeStatus').value=employee.status==='ativo'?'online':'offline';
+    document.getElementById('editEmployeeNotes').value='';
+    goPage('funcionario-detalhe');
   }
 
-  // RECENT PUNCHES (dashboard)
-  const recentPunches=[
-    {name:'Joao Silva',type:'Entrada',time:'08:02',status:'ok'},
-    {name:'Ana Costa',type:'Entrada',time:'08:10',status:'ok'},
-    {name:'Mariana Souza',type:'Entrada',time:'08:22',status:'late'},
-    {name:'Pedro Oliveira',type:'Saida',time:'15:00',status:'ok'},
-    {name:'Maria Santos',type:'Saida Intervalo',time:'12:05',status:'ok'},
-  ];
-  function renderRecentPunches(){
-    document.getElementById('recentPunchesBody').innerHTML=recentPunches.map(p=>`
-      <tr>
-        <td><div style="display:flex;align-items:center;gap:8px"><div class="emp-avatar" style="width:28px;height:28px;font-size:11px;background:${avatarColor(p.name)}">${p.name.charAt(0)}</div>${p.name}</div></td>
-        <td>${p.type}</td>
-        <td style="font-weight:600">${p.time}</td>
-        <td><span class="badge ${p.status}">${statusLabels[p.status]||'OK'}</span></td>
-      </tr>
-    `).join('');
+  async function saveEmployeeChanges(){
+    if(!selectedEmployeeId) return showToast('Nenhum funcionario selecionado','red');
+
+    const payload={
+      nome:document.getElementById('editEmployeeName').value.trim(),
+      email:document.getElementById('editEmployeeEmail').value.trim(),
+      cargo:document.getElementById('editEmployeeRole').value.trim(),
+      departamento:document.getElementById('editEmployeeDept').value,
+      jornada:document.getElementById('editEmployeeShift').value,
+      status:document.getElementById('editEmployeeStatus').value==='online'?'ativo':'inativo'
+    };
+
+    try{
+      await api('/rh/funcionarios/'+selectedEmployeeId,{method:'PUT',body:JSON.stringify(payload)});
+      await carregarFuncionarios();
+      showToast('Funcionario atualizado!','green');
+      goPage('funcionarios');
+    }catch(err){
+      showToast(err.message,'red');
+    }
   }
 
-  // SOLICITACOES
-  let solicitacoes=[
-    {name:'Mariana Souza',type:'Correcao de Ponto',dateRef:'15/04/2026',desc:'Saida nao registrada',sent:'18/04/2026',status:'pendente'},
-    {name:'Carlos Lima',type:'Atestado Medico',dateRef:'17/04/2026',desc:'Consulta medica',sent:'18/04/2026',status:'pendente'},
-    {name:'Rafael Torres',type:'Folga Compensatoria',dateRef:'12/04/2026',desc:'Compensacao de horas extras',sent:'16/04/2026',status:'pendente'},
-    {name:'Joao Silva',type:'Correcao de Ponto',dateRef:'10/04/2026',desc:'Entrada com atraso justificado',sent:'11/04/2026',status:'aprovado'},
-    {name:'Ana Costa',type:'Ferias',dateRef:'01/05/2026',desc:'Ferias programadas',sent:'05/04/2026',status:'aprovado'},
-  ];
-  let solFilter='all';
+  async function carregarSolicitacoes(){
+    const status=solFilter==='all'?'all':solFilter;
+    const rows=await api('/rh/solicitacoes?status='+status);
+    solicitacoes=rows;
+    renderSolicitacoes();
 
-  function filterReqs(f){solFilter=f;renderSolicitacoes()}
+    const pendingSolic=rows.filter(r=>r.status==='pendente').map(s=>({
+      origem:'Solicitacao',
+      nome:s.Funcionario?.nome||'-',
+      tipo:s.tipo,
+      data:s.data_referencia,
+      acoes:`<div style="display:flex;gap:6px"><button class="btn btn-primary btn-sm" onclick="updateSolicitacao(${s.id_solicitacao},'aprovado')"><i class="fas fa-check"></i></button><button class="btn btn-danger btn-sm" onclick="updateSolicitacao(${s.id_solicitacao},'negado')"><i class="fas fa-times"></i></button></div>`
+    }));
+    const pendingAtest=(atestados||[]).filter(a=>a.status==='pendente').map(a=>({
+      origem:'Atestado',
+      nome:a.Funcionario?.nome||'-',
+      tipo:'atestado',
+      data:a.data_referencia,
+      acoes:`<div style="display:flex;gap:6px"><button class="btn btn-primary btn-sm" onclick="updateAtestado(${a.id_atestado},'aprovado')"><i class="fas fa-check"></i></button><button class="btn btn-danger btn-sm" onclick="updateAtestado(${a.id_atestado},'negado')"><i class="fas fa-times"></i></button></div>`
+    }));
+    const pending=[...pendingSolic,...pendingAtest].sort((a,b)=>new Date(a.data)-new Date(b.data)).slice(0,4);
+    document.getElementById('pendingReqBody').innerHTML=pending.map(s=>`<tr><td>${s.nome}</td><td>${s.origem}: ${s.tipo}</td><td>${new Date(s.data).toLocaleDateString('pt-BR')}</td><td>${s.acoes}</td></tr>`).join('') || '<tr><td colspan="4">Sem pendencias.</td></tr>';
+    updateSideBadges(dashboardSnapshot);
+    renderNotificacoes(dashboardSnapshot);
+  }
+
+  function filterReqs(f){ solFilter=f; carregarSolicitacoes(); }
+
   function renderSolicitacoes(){
-    const filtered=solFilter==='all'?solicitacoes:solicitacoes.filter(s=>s.status===solFilter);
-    document.getElementById('solBody').innerHTML=filtered.map((s,i)=>`
-      <tr>
-        <td><div style="display:flex;align-items:center;gap:8px"><div class="emp-avatar" style="width:28px;height:28px;font-size:11px;background:${avatarColor(s.name)}">${s.name.charAt(0)}</div>${s.name}</div></td>
-        <td>${s.type}</td>
-        <td>${s.dateRef}</td>
-        <td style="color:var(--gray-500)">${s.desc}</td>
-        <td>${s.sent}</td>
-        <td><span class="badge ${s.status==='pendente'?'pending':s.status==='aprovado'?'approved':'rejected'}">${s.status.charAt(0).toUpperCase()+s.status.slice(1)}</span></td>
-        <td>
-          ${s.status==='pendente'?`
-            <div style="display:flex;gap:6px">
-              <button class="btn btn-primary btn-sm" onclick="approveReq(${i})"><i class="fas fa-check"></i></button>
-              <button class="btn btn-danger btn-sm" onclick="rejectReq(${i})"><i class="fas fa-times"></i></button>
-            </div>
-          `:'<span style="font-size:12px;color:var(--gray-400)">Concluido</span>'}
-        </td>
-      </tr>
-    `).join('');
-  }
-  function approveReq(i){solicitacoes[i].status='aprovado';renderSolicitacoes();showToast('Solicitacao aprovada!','green')}
-  function rejectReq(i){solicitacoes[i].status='negado';renderSolicitacoes();showToast('Solicitacao negada','red')}
+    const q=(document.getElementById('solSearch')?.value||'').toLowerCase();
+    const centralSolic=solicitacoes.map(s=>({
+      origem:'Solicitacao',
+      nome:s.Funcionario?.nome||'-',
+      tipo:s.tipo,
+      dataRef:s.data_referencia,
+      descricao:s.descricao||'',
+      dataCadastro:s.data_cadastro,
+      status:s.status,
+      acaoPendente:()=>`<div style="display:flex;gap:6px"><button class="btn btn-primary btn-sm" onclick="updateSolicitacao(${s.id_solicitacao},'aprovado')"><i class="fas fa-check"></i></button><button class="btn btn-danger btn-sm" onclick="updateSolicitacao(${s.id_solicitacao},'negado')"><i class="fas fa-times"></i></button></div>`
+    }));
+    const centralAtest=(atestados||[]).map(a=>({
+      origem:'Atestado',
+      nome:a.Funcionario?.nome||'-',
+      tipo:'atestado',
+      dataRef:a.data_referencia,
+      descricao:a.descricao||'Atestado medico',
+      dataCadastro:a.data_cadastro,
+      status:a.status,
+      acaoPendente:()=>`<div style="display:flex;gap:6px"><button class="btn btn-primary btn-sm" onclick="updateAtestado(${a.id_atestado},'aprovado')"><i class="fas fa-check"></i></button><button class="btn btn-danger btn-sm" onclick="updateAtestado(${a.id_atestado},'negado')"><i class="fas fa-times"></i></button></div>`
+    }));
 
-  // PENDING (dashboard)
-  function renderPendingReqs(){
-    const pending=solicitacoes.filter(s=>s.status==='pendente').slice(0,4);
-    document.getElementById('pendingReqBody').innerHTML=pending.map((s,i)=>`
-      <tr>
-        <td>${s.name}</td>
-        <td>${s.type}</td>
-        <td>${s.dateRef}</td>
-        <td><div style="display:flex;gap:6px">
-          <button class="btn btn-primary btn-sm" onclick="approveReq(${i});renderPendingReqs()"><i class="fas fa-check"></i></button>
-          <button class="btn btn-danger btn-sm" onclick="rejectReq(${i});renderPendingReqs()"><i class="fas fa-times"></i></button>
-        </div></td>
-      </tr>
-    `).join('');
+    const base=[...centralSolic,...centralAtest]
+      .filter(i=>centralTipoFilter==='all'||(centralTipoFilter==='solicitacao'?i.origem==='Solicitacao':i.origem==='Atestado'))
+      .filter(i=>solFilter==='all'||i.status===solFilter)
+      .filter(i=>{
+        if(!q) return true;
+        return i.nome.toLowerCase().includes(q)||i.descricao.toLowerCase().includes(q);
+      })
+      .sort((a,b)=>new Date(b.dataCadastro)-new Date(a.dataCadastro));
+
+    document.getElementById('solBody').innerHTML=base.map(s=>`<tr><td><span class="badge ${s.origem==='Atestado'?'pending':'ok'}">${s.origem}</span></td><td><div style="display:flex;align-items:center;gap:8px"><div class="emp-avatar" style="width:28px;height:28px;font-size:11px;background:${avatarColor((s.nome||'N').toString())}">${(s.nome||'N')[0]}</div>${s.nome}</div></td><td>${s.tipo}</td><td>${new Date(s.dataRef).toLocaleDateString('pt-BR')}</td><td style="color:var(--gray-500)">${s.descricao}</td><td>${new Date(s.dataCadastro).toLocaleDateString('pt-BR')}</td><td><span class="badge ${s.status==='pendente'?'pending':s.status==='aprovado'?'approved':'rejected'}">${s.status.charAt(0).toUpperCase()+s.status.slice(1)}</span></td><td>${s.status==='pendente'?s.acaoPendente():'<span style="font-size:12px;color:var(--gray-400)">Concluido</span>'}</td></tr>`).join('') || '<tr><td colspan="8">Nenhum item encontrado.</td></tr>';
   }
 
-  // ATESTADOS
-  const atestados=[
-    {name:'Carlos Lima',type:'Consulta',cid:'Z00.0',inicio:'17/04',fim:'17/04',dias:1,status:'ok'},
-    {name:'Fernanda Alves',type:'Cirurgia',cid:'K35.2',inicio:'10/04',fim:'20/04',dias:10,status:'absent'},
-    {name:'Roberto Nunes',type:'Exames',cid:'Z01.0',inicio:'15/04',fim:'15/04',dias:1,status:'ok'},
-  ];
-  function renderAtestados(){
-    document.getElementById('atestBody').innerHTML=atestados.map(a=>`
-      <tr>
-        <td>${a.name}</td>
-        <td>${a.type}</td>
-        <td><code style="background:var(--gray-100);padding:2px 6px;border-radius:4px;font-size:12px">${a.cid}</code></td>
-        <td>${a.inicio}</td>
-        <td>${a.fim}</td>
-        <td style="font-weight:700">${a.dias}</td>
-        <td><span class="badge ${a.status==='ok'?'ok':'absent'}">${a.status==='ok'?'Retornou':'Afastado'}</span></td>
-      </tr>
-    `).join('');
+  async function updateSolicitacao(id,status){
+    try{
+      await api('/rh/solicitacoes/'+id,{method:'PUT',body:JSON.stringify({status})});
+      await carregarSolicitacoes();
+      showToast('Solicitacao atualizada','green');
+    }catch(err){
+      showToast(err.message,'red');
+    }
   }
 
-  // BANCO DE HORAS
-  const bancoData=[
-    {name:'Joao Silva',depto:'Tecnologia',horas:'168h 30m',meta:'176h',saldo:'+8h 30m',type:'extra'},
-    {name:'Maria Santos',depto:'RH',horas:'172h 00m',meta:'176h',saldo:'-4h 00m',type:'absent'},
-    {name:'Ana Costa',depto:'Financeiro',horas:'176h 00m',meta:'176h',saldo:'0h 00m',type:'ok'},
-    {name:'Pedro Oliveira',depto:'Logistica',horas:'194h 20m',meta:'176h',saldo:'+18h 20m',type:'extra'},
-    {name:'Mariana Souza',depto:'Tecnologia',horas:'170h 10m',meta:'176h',saldo:'-5h 50m',type:'absent'},
-    {name:'Juliana Ferreira',depto:'Comercial',horas:'179h 00m',meta:'176h',saldo:'+3h 00m',type:'extra'},
-  ];
-  function renderBanco(){
-    document.getElementById('bancoBody').innerHTML=bancoData.map(b=>`
-      <tr>
-        <td><div style="display:flex;align-items:center;gap:8px"><div class="emp-avatar" style="width:28px;height:28px;font-size:11px;background:${avatarColor(b.name)}">${b.name.charAt(0)}</div>${b.name}</div></td>
-        <td>${b.depto}</td>
-        <td style="font-weight:600">${b.horas}</td>
-        <td style="color:var(--gray-500)">${b.meta}</td>
-        <td style="font-weight:700;color:${b.type==='extra'?'var(--green)':b.type==='absent'?'var(--red)':'var(--gray-700)'}">${b.saldo}</td>
-        <td><span class="badge ${b.type==='extra'?'extra':b.type==='absent'?'absent':'ok'}">${b.type==='extra'?'Positivo':b.type==='absent'?'Negativo':'Zerado'}</span></td>
-      </tr>
-    `).join('');
+  async function carregarAtestados(){
+    const rows=await api('/rh/atestados');
+    atestados=rows;
+    aplicarFiltroAtestados();
+
+    const now=new Date();
+    const m=now.getMonth();
+    const y=now.getFullYear();
+    const mes=rows.filter(a=>{const d=new Date(a.data_cadastro);return d.getMonth()===m&&d.getFullYear()===y;});
+    document.getElementById('kpiAtestadosMes').textContent=String(mes.length);
+    document.getElementById('kpiAtestadosPendentes').textContent=String(rows.filter(a=>a.status==='pendente').length);
+    document.getElementById('kpiAtestadosAprovados').textContent=String(rows.filter(a=>a.status==='aprovado').length);
+    updateSideBadges(dashboardSnapshot);
+    renderNotificacoes(dashboardSnapshot);
+  }
+
+  function aplicarFiltroAtestados(){
+    const q=(document.getElementById('atestSearch')?.value||'').toLowerCase();
+    const st=(document.getElementById('atestStatusFilter')?.value||'all');
+    const base=atestados.filter(a=>{
+      const okNome=(a.Funcionario?.nome||'').toLowerCase().includes(q);
+      const okStatus=st==='all'||a.status===st;
+      return okNome&&okStatus;
+    });
+    document.getElementById('atestBody').innerHTML=base.map(a=>`<tr><td>${a.Funcionario?.nome||'-'}</td><td>${a.descricao||'Atestado medico'}</td><td>${new Date(a.data_referencia).toLocaleDateString('pt-BR')}</td><td>${a.arquivo_path?`<a href="${API_URL}${a.arquivo_path}" target="_blank" rel="noopener">${a.arquivo_nome||'Abrir arquivo'}</a>`:'-'}</td><td><span class="badge ${a.status==='aprovado'?'ok':a.status==='negado'?'absent':'pending'}">${a.status}</span></td><td>${a.status==='pendente'?`<div style="display:flex;gap:6px"><button class="btn btn-primary btn-sm" onclick="updateAtestado(${a.id_atestado},'aprovado')"><i class="fas fa-check"></i></button><button class="btn btn-danger btn-sm" onclick="updateAtestado(${a.id_atestado},'negado')"><i class="fas fa-times"></i></button></div>`:'<span style="font-size:12px;color:var(--gray-400)">Concluido</span>'}</td></tr>`).join('') || '<tr><td colspan="6">Nenhum atestado encontrado.</td></tr>';
+  }
+
+  async function updateAtestado(id,status){
+    try{
+      await api('/rh/atestados/'+id,{method:'PUT',body:JSON.stringify({status})});
+      await carregarAtestados();
+      await carregarDashboard(document.getElementById('filterDate').value);
+      showToast('Atestado atualizado','green');
+    }catch(err){
+      showToast(err.message,'red');
+    }
+  }
+
+  async function carregarBancoHoras(){
+    const allRows=await api('/rh/banco-horas');
+    const q=(document.getElementById('bancoSearch')?.value||'').toLowerCase();
+    const rows=allRows.filter(b=>(b.nome||'').toLowerCase().includes(q));
+    document.getElementById('bancoBody').innerHTML=rows.map(b=>`<tr><td><a href="#" onclick="openBancoDetalhe(${b.id_funcionario});return false;">${b.nome}</a></td><td>${b.cargo||'-'}</td><td style="font-weight:600">${b.horas_mes}</td><td style="color:var(--gray-500)">${b.meta}</td><td style="font-weight:700">${b.saldo}</td><td><span class="badge ${b.saldo.startsWith('-')?'absent':'extra'}">${b.saldo.startsWith('-')?'Negativo':'Positivo'}</span></td></tr>`).join('') || '<tr><td colspan="6">Nenhum funcionario encontrado.</td></tr>';
+
     const bp=document.getElementById('bancoProgress');
-    bp.innerHTML=bancoData.map(b=>{
-      const pct=Math.min(100,Math.round(parseInt(b.horas)*100/176));
-      const cls=pct>100?'green':pct<90?'red':'';
-      return`<div class="progress-wrap"><div class="progress-header"><span class="progress-label">${b.name}</span><span class="progress-val">${b.horas}</span></div><div class="progress-bar"><div class="progress-fill ${cls}" style="width:${Math.min(pct,100)}%"></div></div></div>`;
+    bp.innerHTML=rows.map(b=>{
+      const worked=Math.max(0,durationToMinutes(b.horas_mes));
+      const goal=Math.max(1,durationToMinutes(b.meta));
+      const pct=Math.min(100,Math.round((worked/goal)*100));
+      return `<div class="progress-wrap"><div class="progress-header"><span class="progress-label">${b.nome}</span><span class="progress-val">${b.horas_mes}</span></div><div class="progress-bar"><div class="progress-fill ${b.saldo.startsWith('-')?'red':''}" style="width:${pct}%"></div></div></div>`;
     }).join('');
+
+    let totalExtras=0;
+    let totalNegativas=0;
+    rows.forEach(b=>{
+      const saldo=durationToMinutes(b.saldo);
+      if(saldo>=0) totalExtras+=saldo;
+      else totalNegativas+=Math.abs(saldo);
+    });
+    const liquido=totalExtras-totalNegativas;
+    const compensacoes=Math.round(totalNegativas*0.4);
+
+    document.getElementById('bancoTotalExtras').textContent=minutesToDuration(totalExtras);
+    document.getElementById('bancoTotalNegativas').textContent='-'+minutesToDuration(totalNegativas).replace('+','');
+    document.getElementById('bancoSaldoLiquido').textContent=minutesToDuration(liquido);
+    document.getElementById('bancoCompensacoes').textContent='-'+minutesToDuration(compensacoes).replace('+','');
+    document.getElementById('kpiSaldoBanco').textContent=minutesToDuration(liquido);
+    document.getElementById('kpiSaldoBancoTrend').innerHTML='<i class="fas fa-hourglass-half"></i> '+rows.length+' colaboradores no mes';
   }
 
-  // REL PROGRESS
-  function renderRelProgress(){
-    const items=[
-      {label:'Presenca media',val:93,cls:''},
-      {label:'Cumprimento de jornada',val:88,cls:''},
-      {label:'Registros com geolocalizacao',val:94,cls:''},
-      {label:'Solicitacoes resolvidas',val:72,cls:'amber'},
-      {label:'Atestados validados',val:100,cls:''},
+  function aplicarFiltroRegistros(){
+    const dept=(document.getElementById('regDeptFilter')?.value||'Todos os departamentos');
+    const stLabel=(document.getElementById('regStatusFilter')?.value||'Todos os status');
+    const rows=(dashboardRows||[]).filter(c=>{
+      const okDept=dept==='Todos os departamentos'||(c.departamento||'Geral')===dept;
+      const map={'Em Expediente':'em_expediente','Ausencia de Ponto':'ausencia_ponto','Ponto Duplicado':'ponto_duplicado'};
+      const okStatus=stLabel==='Todos os status'||c.status===map[stLabel];
+      return okDept&&okStatus;
+    });
+    const regBody=document.getElementById('regBody');
+    regBody.innerHTML=rows.map(c=>`<tr style="${rowStatusStyle(c.status)}"><td><a href="#" onclick="openRegistroDetalhe(${c.id_funcionario},'${(c.nome||'').replace(/'/g, "\\'")}');return false;" style="text-decoration:none;color:inherit"><div style="display:flex;align-items:center;gap:8px"><div class="emp-avatar" style="width:28px;height:28px;font-size:11px;background:${avatarColor(c.nome)}">${c.nome.charAt(0)}</div>${c.nome}</div></a></td><td>${c.departamento||'Geral'}</td><td id="seq-cell-${c.id_funcionario}" style="font-size:11px;color:var(--gray-500)">Carregando sequencia...</td><td style="font-weight:600">${c.entrada||'--:--'}</td><td>${c.intervalo_saida||'--:--'}</td><td>${c.intervalo_retorno||'--:--'}</td><td style="font-weight:600">${c.saida||'--:--'}</td><td style="font-weight:700">${c.total_trabalhado||'0h 00m'}</td><td style="font-weight:700">${c.saldo_dia||'0h 00m'}</td><td>${resumoHorasBadge(c)}</td></tr>`).join('') || '<tr><td colspan="10">Nenhum registro encontrado para o filtro informado.</td></tr>';
+    document.getElementById('regCount').textContent=rows.length+' registro(s)';
+    preencherSequenciaRegistros(rows).catch(()=>{});
+  }
+
+  function labelsSequenciaDia(){
+    return ['Entrada','Intervalo','Fim do intervalo','Saida para almoco','Retorno do almoco','Intervalo','Fim do intervalo','Encerramento do expediente'];
+  }
+
+  function montarSequenciaTexto(registros=[]){
+    if(!registros.length) return 'Sem batidas';
+    const labels=labelsSequenciaDia();
+    const usados=Math.min(registros.length,labels.length);
+    return labels.slice(0,usados).join(' -> ');
+  }
+
+  async function preencherSequenciaRegistros(rows=[]){
+    const data=(document.getElementById('filterDate').value||'').trim();
+    if(!data||!rows.length) return;
+
+    await Promise.all(rows.map(async c=>{
+      const cell=document.getElementById('seq-cell-'+c.id_funcionario);
+      if(!cell) return;
+      const cacheKey=c.id_funcionario+'_'+data;
+      if(registrosSequenciaCache[cacheKey]){
+        cell.textContent=registrosSequenciaCache[cacheKey];
+        return;
+      }
+      try{
+        const detalhe=await api('/rh/funcionarios/'+c.id_funcionario+'/pontos-dia?data='+encodeURIComponent(data));
+        const texto=montarSequenciaTexto(detalhe.registros||[]);
+        registrosSequenciaCache[cacheKey]=texto;
+        cell.textContent=texto;
+      }catch(_err){
+        cell.textContent='Nao foi possivel carregar';
+      }
+    }));
+  }
+
+  function rotularSequenciaDia(registros=[]){
+    const fluxo=[
+      {tipo:'entrada',label:'Entrada'},
+      {tipo:'intervalo_saida',label:'Intervalo 1 - Inicio'},
+      {tipo:'intervalo_retorno',label:'Intervalo 1 - Fim'},
+      {tipo:'intervalo_saida',label:'Saida para Almoco'},
+      {tipo:'intervalo_retorno',label:'Retorno do Almoco'},
+      {tipo:'intervalo_saida',label:'Intervalo 2 - Inicio'},
+      {tipo:'intervalo_retorno',label:'Intervalo 2 - Fim'},
+      {tipo:'saida',label:'Encerramento do Expediente'}
     ];
-    document.getElementById('relProgress').innerHTML=items.map(it=>`
-      <div class="progress-wrap"><div class="progress-header"><span class="progress-label">${it.label}</span><span class="progress-val">${it.val}%</span></div><div class="progress-bar"><div class="progress-fill ${it.cls}" style="width:${it.val}%"></div></div></div>
-    `).join('');
+    return registros.map((r,index)=>{
+      let label=r.label||r.tipo;
+      const idx=index%fluxo.length;
+      if(r.tipo===fluxo[idx].tipo){
+        label=fluxo[idx].label;
+      }
+      return {...r,label};
+    });
   }
 
-  // CHART
+  async function openRegistroDetalhe(id,nome){
+    try{
+      selectedRegistroFuncionarioId=id;
+      selectedRegistroFuncionarioNome=nome||'';
+      selectedRegistroData=document.getElementById('filterDate').value;
+      const data=await api('/rh/funcionarios/'+id+'/pontos-dia?data='+selectedRegistroData);
+      selectedRegistroFuncionarioNome=selectedRegistroFuncionarioNome||data.funcionario||'';
+      document.getElementById('regDetalheTitulo').textContent='Detalhes de '+(selectedRegistroFuncionarioNome||data.funcionario);
+      document.getElementById('regDetalheResumo').textContent='Data: '+new Date(data.data+'T12:00:00').toLocaleDateString('pt-BR')+' | Jornada: '+data.jornada+' | Total: '+data.horas_trabalhadas+' | Saldo: '+data.saldo_dia;
+      const registrosRotulados=rotularSequenciaDia(data.registros||[]);
+      document.getElementById('regDetalheBody').innerHTML=registrosRotulados.map(r=>`<tr><td>${r.label}</td><td>${r.horario}</td><td><button type="button" class="btn btn-secondary btn-sm" onclick="abrirModalEditarPonto(${r.id_registro},'${r.tipo}','${r.horario}');return false;"><i class="fas fa-pen"></i></button></td></tr>`).join('') || '<tr><td colspan="3">Sem batidas no dia.</td></tr>';
+      renderAuditTrail();
+      document.getElementById('modalRegDetalhe').classList.add('show');
+    }catch(err){
+      showToast(err.message,'red');
+    }
+  }
+
+  function getAuditKey(){
+    if(!selectedRegistroFuncionarioId||!selectedRegistroData) return '';
+    return 'ps_rh_audit_'+selectedRegistroFuncionarioId+'_'+selectedRegistroData;
+  }
+
+  function getAuditEntries(){
+    const key=getAuditKey();
+    if(!key) return [];
+    try{
+      return JSON.parse(localStorage.getItem(key)||'[]');
+    }catch(_e){
+      return [];
+    }
+  }
+
+  function saveAuditEntries(entries){
+    const key=getAuditKey();
+    if(!key) return;
+    localStorage.setItem(key,JSON.stringify(entries.slice(0,50)));
+  }
+
+  function pushAuditEntry(item){
+    const entries=getAuditEntries();
+    entries.unshift({
+      ...item,
+      criadoEm:new Date().toISOString(),
+      operador:user.name||'RH'
+    });
+    saveAuditEntries(entries);
+    renderAuditTrail();
+  }
+
+  function renderAuditTrail(){
+    const box=document.getElementById('regAuditTrail');
+    if(!box) return;
+    const entries=getAuditEntries();
+    if(!entries.length){
+      box.innerHTML='<div style="padding:8px;border:1px solid var(--gray-200);border-radius:8px;background:var(--gray-100)">Sem alteracoes registradas neste dispositivo.</div>';
+      return;
+    }
+    box.innerHTML=entries.map(e=>`<div style="padding:8px;border:1px solid var(--gray-200);border-radius:8px;background:#fff"><div style="font-weight:700;color:var(--navy)">${e.acao}</div><div style="margin-top:2px">Anterior: ${e.anterior||'-'} | Novo: ${e.novo||'-'}</div><div style="margin-top:2px">Motivo: ${e.justificativa}</div><div style="margin-top:2px;color:var(--gray-500)">${new Date(e.criadoEm).toLocaleDateString('pt-BR')} ${new Date(e.criadoEm).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} - ${e.operador}</div></div>`).join('');
+  }
+
+  function abrirModalEditarPonto(idRegistro,tipoAtual,horarioAtual){
+    editPontoRegistroId=idRegistro;
+    document.getElementById('editPontoTipo').value=tipoAtual||'entrada';
+    document.getElementById('editPontoTipo').dataset.originalTipo=tipoAtual||'entrada';
+    document.getElementById('editPontoHorarioAtual').value=horarioAtual||'';
+    document.getElementById('editPontoHorarioNovo').value=horarioAtual||'';
+    document.getElementById('editPontoJustificativa').value='';
+    document.getElementById('modalEditarPonto').classList.add('show');
+    setTimeout(()=>{document.getElementById('editPontoHorarioNovo').focus();},30);
+  }
+
+  function fecharModalEditarPonto(){
+    document.getElementById('modalEditarPonto').classList.remove('show');
+    document.getElementById('editPontoJustificativa').value='';
+    editPontoRegistroId=null;
+  }
+
+  async function atualizarTelaRegistrosAposEdicao(){
+    goPage('registros');
+    await carregarDashboard(selectedRegistroData||document.getElementById('filterDate').value);
+    goPage('registros');
+    if(selectedRegistroFuncionarioId){
+      await openRegistroDetalhe(selectedRegistroFuncionarioId, selectedRegistroFuncionarioNome);
+    }
+  }
+
+  function formatHorarioInput(value=''){
+    const digits=String(value).replace(/\D/g,'').slice(0,4);
+    if(digits.length<=2) return digits;
+    return digits.slice(0,2)+':'+digits.slice(2);
+  }
+
+  function bindHorarioMask(){
+    const input=document.getElementById('editPontoHorarioNovo');
+    if(!input) return;
+    input.addEventListener('input',()=>{
+      input.value=formatHorarioInput(input.value);
+    });
+  }
+
+  function bindHorarioMaskNovoPonto(){
+    const input=document.getElementById('regNovoHorario');
+    if(!input) return;
+    input.addEventListener('input',()=>{
+      input.value=formatHorarioInput(input.value);
+    });
+  }
+
+  async function salvarEdicaoPonto(){
+    const tipo=(document.getElementById('editPontoTipo').value||'').trim();
+    const horario=(document.getElementById('editPontoHorarioNovo').value||'').trim();
+    const horarioAnterior=(document.getElementById('editPontoHorarioAtual').value||'').trim();
+    const tipoAnterior=(document.getElementById('editPontoTipo').dataset.originalTipo||document.getElementById('editPontoTipo').value||'').trim();
+    const justificativa=(document.getElementById('editPontoJustificativa').value||'').trim();
+    if(!/^([01]\d|2[0-3]):([0-5]\d)$/.test(horario)){
+      return showToast('Horario invalido. Use HH:mm','red');
+    }
+    if(!justificativa){
+      return showToast('Informe a justificativa da alteracao','red');
+    }
+    if(!['entrada','intervalo_saida','intervalo_retorno','saida'].includes(tipo)){
+      return showToast('Tipo de batida invalido','red');
+    }
+    if(!editPontoRegistroId){
+      return showToast('Registro de ponto nao selecionado','red');
+    }
+
+    try{
+      await api('/rh/pontos/'+editPontoRegistroId+'/horario',{method:'PUT',body:JSON.stringify({tipo,horario})});
+      pushAuditEntry({
+        acao:'Edicao de batida',
+        anterior:tipoAnterior+' '+horarioAnterior,
+        novo:tipo+' '+horario,
+        justificativa
+      });
+      fecharModalEditarPonto();
+      await atualizarTelaRegistrosAposEdicao();
+      showToast('Horario atualizado','green');
+    }catch(err){
+      showToast(err.message,'red');
+    }
+  }
+
+  async function adicionarPontoManualDetalhe(){
+    if(!selectedRegistroFuncionarioId){
+      return showToast('Funcionario nao selecionado','red');
+    }
+
+    const tipo=(document.getElementById('regNovoTipo').value||'').trim();
+    const horario=(document.getElementById('regNovoHorario').value||'').trim();
+    const justificativa=(document.getElementById('regNovoJustificativa').value||'').trim();
+    const data=(selectedRegistroData||document.getElementById('filterDate').value||'').trim();
+
+    if(!data){
+      return showToast('Data do registro nao informada','red');
+    }
+    if(!/^([01]\d|2[0-3]):([0-5]\d)$/.test(horario)){
+      return showToast('Horario invalido. Use HH:mm','red');
+    }
+    if(!['entrada','intervalo_saida','intervalo_retorno','saida'].includes(tipo)){
+      return showToast('Tipo de batida invalido','red');
+    }
+    if(!justificativa){
+      return showToast('Informe a justificativa da inclusao','red');
+    }
+
+    try{
+      await api('/rh/funcionarios/'+selectedRegistroFuncionarioId+'/pontos-manual',{
+        method:'POST',
+        body:JSON.stringify({tipo,horario,data})
+      });
+      pushAuditEntry({
+        acao:'Inclusao manual de batida',
+        anterior:'-',
+        novo:tipo+' '+horario,
+        justificativa
+      });
+      document.getElementById('regNovoHorario').value='';
+      document.getElementById('regNovoJustificativa').value='';
+      await atualizarTelaRegistrosAposEdicao();
+      showToast('Batida adicionada com sucesso','green');
+    }catch(err){
+      showToast(err.message,'red');
+    }
+  }
+
+  async function excluirBatidaEditada(){
+    if(!editPontoRegistroId){
+      return showToast('Registro de ponto nao selecionado','red');
+    }
+    const justificativa=(document.getElementById('editPontoJustificativa').value||'').trim();
+    if(!justificativa){
+      return showToast('Informe a justificativa da exclusao','red');
+    }
+    if(!confirm('Deseja excluir esta batida?')) return;
+
+    try{
+      const tipoAnterior=(document.getElementById('editPontoTipo').value||'').trim();
+      const horarioAnterior=(document.getElementById('editPontoHorarioAtual').value||'').trim();
+      await api('/rh/pontos/'+editPontoRegistroId,{method:'DELETE'});
+      pushAuditEntry({
+        acao:'Exclusao de batida',
+        anterior:tipoAnterior+' '+horarioAnterior,
+        novo:'REMOVIDA',
+        justificativa
+      });
+      fecharModalEditarPonto();
+      await atualizarTelaRegistrosAposEdicao();
+      showToast('Batida excluida com sucesso','green');
+    }catch(err){
+      showToast(err.message,'red');
+    }
+  }
+
+  async function openBancoDetalhe(id){
+    try{
+      const data=await api('/rh/banco-horas/'+id+'/detalhes');
+      document.getElementById('bancoDetalheTitulo').textContent='Banco de Horas - '+data.funcionario;
+      document.getElementById('bancoDetalheBody').innerHTML=data.detalhes.map(d=>`<tr><td>${new Date(d.dia+'T12:00:00').toLocaleDateString('pt-BR')}</td><td>${d.entrada}</td><td>${d.saida}</td><td>${d.horas_trabalhadas}</td><td>${d.saldo_dia}</td></tr>`).join('')||'<tr><td colspan="5">Sem dados no periodo.</td></tr>';
+      document.getElementById('modalBancoDetalhe').classList.add('show');
+    }catch(err){
+      showToast(err.message,'red');
+    }
+  }
+
+  function salvarConfiguracoes(){
+    localStorage.setItem('ps_cfg_razao',document.getElementById('cfgRazao').value||'');
+    localStorage.setItem('ps_cfg_cnpj',document.getElementById('cfgCnpj').value||'');
+    localStorage.setItem('ps_cfg_jornada',document.getElementById('cfgJornada').value||'08:00-17:00');
+    localStorage.setItem('ps_cfg_email_rh',document.getElementById('cfgEmailRh').value||'');
+    localStorage.setItem('ps_cfg_endereco',document.getElementById('cfgEndereco').value||'');
+    showToast('Configuracoes salvas!','green');
+  }
+
   function renderChart(){
+    const rows=dashboardSnapshot?.colaboradores||[];
+    const present=rows.filter(r=>r.status==='em_expediente').length;
+    const late=rows.filter(r=>r.status==='ponto_duplicado').length;
+    const absent=rows.filter(r=>r.status==='ausencia_ponto').length;
     const data=[
-      {day:'Seg',present:236,late:8,absent:4},
-      {day:'Ter',present:240,late:5,absent:3},
-      {day:'Qua',present:228,late:12,absent:8},
-      {day:'Qui',present:242,late:4,absent:2},
-      {day:'Sex',present:231,late:9,absent:8},
+      {day:'Presentes',present,late:0,absent:0},
+      {day:'Duplicados',present:0,late,absent:0},
+      {day:'Sem ponto',present:0,late:0,absent}
     ];
-    const max=248;
-    const wrap=document.getElementById('weekChart');
-    wrap.innerHTML=data.map(d=>`
-      <div class="chart-bar-wrap">
-        <div class="chart-bar" style="height:${Math.round(d.present/max*160)}px" title="${d.present} presentes"></div>
-        <div class="chart-bar amber" style="height:${Math.round(d.late/max*160)}px" title="${d.late} atrasos"></div>
-        <div class="chart-bar red" style="height:${Math.round(d.absent/max*160)}px" title="${d.absent} ausentes"></div>
-        <span class="chart-label">${d.day}</span>
-      </div>
-    `).join('');
+    const max=Math.max(1,present,late,absent);
+    document.getElementById('weekChart').innerHTML=data.map(d=>`<div class="chart-bar-wrap"><div class="chart-bar" style="height:${Math.round(d.present/max*160)}px"></div><div class="chart-bar amber" style="height:${Math.round(d.late/max*160)}px"></div><div class="chart-bar red" style="height:${Math.round(d.absent/max*160)}px"></div><span class="chart-label">${d.day}</span></div>`).join('');
   }
 
-  // TOAST
+  async function downloadPdf(path){
+    try{
+      const resp=await fetch(API_URL+path,{headers:{Authorization:'Bearer '+token}});
+      if(!resp.ok) throw new Error('Nao foi possivel gerar o PDF');
+      const blob=await resp.blob();
+      const url=window.URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=path.split('/').pop()||'relatorio.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      showToast('PDF gerado com sucesso!','green');
+    }catch(err){
+      showToast(err.message,'red');
+    }
+  }
+
   function showToast(msg,type='green'){
     const t=document.getElementById('rhToast');
     const icon=document.getElementById('rhToastIcon');
@@ -1013,21 +1680,33 @@
     setTimeout(()=>t.classList.remove('show'),3000);
   }
 
-  // NOTIFS
-  function toggleNotifs(){document.getElementById('notifPanel').classList.toggle('show')}
-  document.addEventListener('click',e=>{const p=document.getElementById('notifPanel');if(p.classList.contains('show')&&!p.contains(e.target)&&!e.target.closest('button[onclick="toggleNotifs()"]'))p.classList.remove('show')});
+  function toggleNotifs(){document.getElementById('notifPanel').classList.toggle('show');}
+  document.addEventListener('click',e=>{const p=document.getElementById('notifPanel');if(p.classList.contains('show')&&!p.contains(e.target)&&!e.target.closest('button[onclick="toggleNotifs()"]'))p.classList.remove('show');});
 
-  // LOGOUT
-  function logout(){sessionStorage.clear();window.location.href='index.html'}
+  function logout(){sessionStorage.clear();window.location.href='index.html';}
 
-  // INIT
-  renderEmployees();
-  renderRegistros();
-  renderRecentPunches();
-  renderSolicitacoes();
-  renderPendingReqs();
-  renderChart();
-  renderAtestados();
+  async function init(){
+    try{
+      await Promise.all([carregarDashboard(),carregarFuncionarios(),carregarSolicitacoes(),carregarAtestados(),carregarBancoHoras()]);
+      const cpfInput=document.getElementById('newMatricula');
+      if(cpfInput){
+        cpfInput.addEventListener('input',()=>{cpfInput.value=formatCpf(cpfInput.value);});
+      }
+      bindHorarioMask();
+      bindHorarioMaskNovoPonto();
+      document.getElementById('cfgRazao').value=localStorage.getItem('ps_cfg_razao')||'';
+      document.getElementById('cfgCnpj').value=localStorage.getItem('ps_cfg_cnpj')||'';
+      document.getElementById('cfgJornada').value=localStorage.getItem('ps_cfg_jornada')||'08:00-17:00';
+      document.getElementById('cfgEmailRh').value=localStorage.getItem('ps_cfg_email_rh')||'';
+      document.getElementById('cfgEndereco').value=localStorage.getItem('ps_cfg_endereco')||'';
+      setInterval(()=>{carregarDashboard(document.getElementById('filterDate').value).catch(()=>{});},8000);
+      setInterval(()=>{carregarAtestados().catch(()=>{});},45000);
+    }catch(err){
+      showToast(err.message,'red');
+    }
+  }
+
+  init();
 </script>
 </body>
 </html>

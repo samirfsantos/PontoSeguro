@@ -10,8 +10,12 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-// Aqui diz que o funcionário pertence a uma empresa
-      this.belongsTo(models.Empresa, { foreignKey: 'id_empresa' });    }
+  // Aqui diz que o funcionário pertence a uma empresa
+      this.belongsTo(models.Empresa, { foreignKey: 'id_empresa' });
+      this.hasMany(models.RegistroPonto, { foreignKey: 'id_funcionario' });
+      this.hasMany(models.Solicitacao, { foreignKey: 'id_funcionario' });
+      this.hasMany(models.Atestado, { foreignKey: 'id_funcionario' });
+    }
   }
   Funcionario.init({
     id_funcionario: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
@@ -23,9 +27,12 @@ module.exports = (sequelize, DataTypes) => {
     email: DataTypes.STRING,
     senha: DataTypes.STRING,
     cargo: DataTypes.STRING,
+    departamento: DataTypes.STRING,
     salario: DataTypes.DECIMAL,
     data_admissao: DataTypes.DATE,
     status: DataTypes.STRING,
+    perfil: DataTypes.STRING,
+    jornada: DataTypes.STRING,
     data_cadastro: {type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     data_atualizacao: {type: DataTypes.DATE, defaultValue: DataTypes.NOW }
   }, {

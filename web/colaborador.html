@@ -82,6 +82,8 @@
     .punch-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
     .punch-mini{padding:13px;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
     .punch-mini:disabled{opacity:.45;cursor:not-allowed;filter:saturate(.7)}
+    .punch-mini.entrada-btn{background:rgba(0,169,79,.2);color:var(--green);border:1px solid rgba(0,169,79,.35)}
+    .punch-mini.saida-btn{background:rgba(239,68,68,.18);color:var(--red);border:1px solid rgba(239,68,68,.3)}
     .punch-mini.intervalo-in{background:rgba(245,158,11,.2);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
     .punch-mini.intervalo-out{background:rgba(59,130,246,.2);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
 
@@ -207,12 +209,15 @@
       <div class="l-name">Ponto<span>Seguro</span></div>
     </div>
     <div class="tb-actions">
-      <button class="tb-btn" onclick="showToast('Sem novas notificacoes','success')">
+      <button class="tb-btn" onclick="switchTab('perfil')">
         <i class="fas fa-bell"></i>
-        <span class="notif-dot"></span>
+        <span class="notif-dot" id="colabNotifDot" style="display:none"></span>
       </button>
       <button class="tb-btn" onclick="switchTab('perfil')">
         <i class="fas fa-user"></i>
+      </button>
+      <button class="tb-btn" onclick="logout()" title="Sair">
+        <i class="fas fa-sign-out-alt"></i>
       </button>
     </div>
   </div>
@@ -230,20 +235,7 @@
 
 <div class="content">
 
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('ponto')" id="tab-ponto">
-      <i class="fas fa-fingerprint"></i>Ponto
-    </button>
-    <button class="tab-btn" onclick="switchTab('historico')" id="tab-historico">
-      <i class="fas fa-calendar-alt"></i>Historico
-    </button>
-    <button class="tab-btn" onclick="switchTab('solicitacoes')" id="tab-solicitacoes">
-      <i class="fas fa-clipboard-list"></i>Pedidos
-    </button>
-    <button class="tab-btn" onclick="switchTab('perfil')" id="tab-perfil">
-      <i class="fas fa-user-circle"></i>Perfil
-    </button>
-  </div>
+  <div style="margin-bottom:12px;background:#fff;border-radius:12px;padding:10px 12px;font-size:12px;color:#64748B">Use o menu inferior para navegar entre Ponto, Historico e Central.</div>
 
   <!-- PANEL PONTO -->
   <div class="panel active" id="panel-ponto">
@@ -264,11 +256,13 @@
         <span class="geo-badge" id="geoBadge">GPS</span>
       </div>
 
-      <button class="punch-btn entrada" id="punchBtn" onclick="registrarPonto()">
-        <div class="btn-spinner"></div>
-        <span class="btn-label"><i class="fas fa-fingerprint"></i> Registrar Entrada</span>
-      </button>
       <div class="punch-grid">
+        <button class="punch-mini entrada-btn" id="entryBtn" onclick="registrarEntrada()">
+          <i class="fas fa-sign-in-alt"></i> Registrar Entrada
+        </button>
+        <button class="punch-mini saida-btn" id="exitBtn" onclick="registrarSaida()">
+          <i class="fas fa-sign-out-alt"></i> Registrar Saida
+        </button>
         <button class="punch-mini intervalo-in" id="breakStartBtn" onclick="registrarIntervalo('inicio')">
           <i class="fas fa-coffee"></i> Inicio Intervalo
         </button>
@@ -292,28 +286,32 @@
       </div>
     </div>
 
-    <div class="section-title">Resumo da Semana</div>
+    <div class="section-title">Resumo do Mes</div>
     <div class="summary-row">
       <div class="sum-card green">
-        <div class="sc-label">HORAS TRABALHADAS</div>
-        <div class="sc-value" id="horasSemanais">32h 15m</div>
-        <div class="sc-sub">Meta: 40h semanais</div>
+        <div class="sc-label">HORAS NO MES</div>
+        <div class="sc-value" id="mesHoras">0h 00m</div>
+        <div class="sc-sub">Total trabalhado</div>
       </div>
       <div class="sum-card amber">
-        <div class="sc-label">BANCO DE HORAS</div>
-        <div class="sc-value" id="bancoHoras">+2h 30m</div>
-        <div class="sc-sub">Saldo positivo</div>
-      </div>
-      <div class="sum-card">
-        <div class="sc-label">DIAS TRABALHADOS</div>
-        <div class="sc-value">4</div>
-        <div class="sc-sub">De 5 no periodo</div>
+        <div class="sc-label">HORAS EXTRAS</div>
+        <div class="sc-value" id="mesExtras">0h 00m</div>
+        <div class="sc-sub">Acumulado</div>
       </div>
       <div class="sum-card red">
         <div class="sc-label">ATRASOS</div>
-        <div class="sc-value">1</div>
-        <div class="sc-sub">Ultima semana</div>
+        <div class="sc-value" id="mesAtrasos">0h 00m</div>
+        <div class="sc-sub">Descontos do mes</div>
       </div>
+      <div class="sum-card">
+        <div class="sc-label">SALDO EXTRA TOTAL</div>
+        <div class="sc-value" id="mesSaldoExtra">0h 00m</div>
+        <div class="sc-sub">Extras - atrasos</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px;background:#fff;border-radius:12px;padding:10px 12px;font-size:12px;color:#64748B" id="extraCalcHint">
+      Horas extras: max(total do dia - jornada, 0). Atrasos: max(jornada - total do dia, 0).
     </div>
 
   </div>
@@ -326,17 +324,8 @@
       <button class="mf-btn" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
     </div>
 
-    <div class="summary-row" style="margin-bottom:16px">
-      <div class="sum-card green">
-        <div class="sc-label">HORAS NO MES</div>
-        <div class="sc-value">156h 40m</div>
-        <div class="sc-sub">Meta: 176h mensais</div>
-      </div>
-      <div class="sum-card">
-        <div class="sc-label">BANCO DE HORAS</div>
-        <div class="sc-value amber" style="color:var(--amber)">+4h 20m</div>
-        <div class="sc-sub">Saldo acumulado</div>
-      </div>
+    <div style="margin-bottom:16px;background:#fff;border-radius:12px;padding:10px 12px;font-size:12px;color:#64748B">
+      Resumo do mes selecionado: <strong id="histMesResumo">0h 00m</strong> trabalhadas e saldo de extras <strong id="histSaldoResumo">0h 00m</strong>.
     </div>
 
     <div class="section-title">Registros do Mes</div>
@@ -346,9 +335,16 @@
   <!-- PANEL SOLICITACOES -->
   <div class="panel" id="panel-solicitacoes">
     <div class="req-form">
-      <h3><i class="fas fa-plus-circle"></i>Nova Solicitacao</h3>
+      <h3><i class="fas fa-layer-group"></i>Central de Solicitacoes e Atestados</h3>
       <div class="form-row">
-        <label>Tipo de Solicitacao</label>
+        <label>Categoria</label>
+        <select id="centralType" onchange="onCentralTypeChange()">
+          <option value="solicitacao">Solicitacao</option>
+          <option value="atestado">Atestado (PNG/PDF)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label id="reqTypeLabel">Tipo de Solicitacao</label>
         <select id="reqType">
           <option value="">Selecione...</option>
           <option value="correcao">Correcao de Ponto</option>
@@ -359,20 +355,24 @@
           <option value="horas">Banco de Horas</option>
         </select>
       </div>
+      <div class="form-row" id="atestadoFileWrap" style="display:none">
+        <label>Arquivo (PNG ou PDF)</label>
+        <input type="file" id="atestadoFile" accept="image/png,application/pdf" />
+      </div>
       <div class="form-row">
         <label>Data</label>
         <input type="date" id="reqDate" />
       </div>
       <div class="form-row">
-        <label>Descricao</label>
+        <label id="reqDescLabel">Descricao</label>
         <textarea id="reqDesc" placeholder="Descreva o motivo da solicitacao..."></textarea>
       </div>
-      <button class="btn-submit" onclick="submitRequest()">
+      <button class="btn-submit" id="btnSubmitCentral" onclick="submitCentral()">
         <i class="fas fa-paper-plane"></i> Enviar Solicitacao
       </button>
     </div>
 
-    <div class="section-title">Minhas Solicitacoes</div>
+    <div class="section-title">Meu Historico de Solicitacoes e Atestados</div>
     <div class="req-list" id="reqList"></div>
   </div>
 
@@ -382,8 +382,8 @@
       <div class="profile-avatar" id="profileAvatar">J</div>
       <div class="profile-info">
         <div class="pi-name" id="profileName">Joao Colaborador</div>
-        <div class="pi-role">Desenvolvedor de Software</div>
-        <div class="pi-id">ID: #00247 &bull; Matricula: 10247</div>
+        <div class="pi-role" id="profileRole">Colaborador</div>
+        <div class="pi-id" id="profileId">CPF: -</div>
       </div>
     </div>
 
@@ -392,7 +392,7 @@
         <div class="ii-icon"><i class="fas fa-building"></i></div>
         <div>
           <div class="ii-label">DEPARTAMENTO</div>
-          <div class="ii-value">Tecnologia da Informacao</div>
+          <div class="ii-value" id="profileDept">Nao informado</div>
         </div>
         <i class="fas fa-chevron-right ii-arrow"></i>
       </div>
@@ -400,7 +400,7 @@
         <div class="ii-icon"><i class="fas fa-clock"></i></div>
         <div>
           <div class="ii-label">TURNO</div>
-          <div class="ii-value">08:00 - 18:00 (Seg-Sex)</div>
+          <div class="ii-value" id="profileShift">08:00 - 17:00</div>
         </div>
         <i class="fas fa-chevron-right ii-arrow"></i>
       </div>
@@ -408,7 +408,7 @@
         <div class="ii-icon"><i class="fas fa-map-marker-alt"></i></div>
         <div>
           <div class="ii-label">UNIDADE</div>
-          <div class="ii-value">Matriz - Campina Grande, PB</div>
+          <div class="ii-value" id="profileUnit">Nao informado</div>
         </div>
         <i class="fas fa-chevron-right ii-arrow"></i>
       </div>
@@ -430,6 +430,13 @@
       </div>
     </div>
 
+    <div class="req-form" style="margin-top:12px">
+      <h3><i class="fas fa-bell"></i>Notificacoes do RH</h3>
+      <div id="perfilNotifs" style="display:flex;flex-direction:column;gap:10px;font-size:12px;color:var(--gray-700)">
+        <div style="padding:10px 12px;border:1px solid var(--gray-200);border-radius:10px;background:var(--white)">Sem notificacoes no momento.</div>
+      </div>
+    </div>
+
     <button class="btn-logout" onclick="logout()">
       <i class="fas fa-sign-out-alt"></i> Sair da Conta
     </button>
@@ -446,10 +453,7 @@
     <i class="fas fa-calendar-alt"></i><span>Historico</span>
   </button>
   <button class="nav-item" onclick="switchTab('solicitacoes')" id="nav-solicitacoes">
-    <i class="fas fa-clipboard-list"></i><span>Pedidos</span>
-  </button>
-  <button class="nav-item" onclick="switchTab('perfil')" id="nav-perfil">
-    <i class="fas fa-user-circle"></i><span>Perfil</span>
+    <i class="fas fa-clipboard-list"></i><span>Central</span>
   </button>
 </nav>
 
@@ -460,183 +464,309 @@
 </div>
 
 <script>
-  // STATE
+  const API_URL=localStorage.getItem('ps_api_url')||'http://localhost:3001';
   const MONTHS=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const WEEKDAYS=['Domingo','Segunda-feira','Terca-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sabado'];
+
+  const token=sessionStorage.getItem('ps_token');
+  const user=JSON.parse(sessionStorage.getItem('ps_user')||'{}');
+  if(!token){ window.location.href='index.html'; }
+
   let workStatus='fora';
-  let todayPunches=[];
-  let currentMonth=3; // abril
-  let currentYear=2026;
-  let requests=[];
+  let registrosMes=[];
+  let solicitacoes=[];
+  let atestadosColab=[];
+  let currentMonth=(new Date()).getMonth();
+  let currentYear=(new Date()).getFullYear();
+  const FLUXO_DIA=[
+    {tipo:'entrada',label:'Entrada'},
+    {tipo:'intervalo_saida',label:'Intervalo 1 - Inicio'},
+    {tipo:'intervalo_retorno',label:'Intervalo 1 - Fim'},
+    {tipo:'intervalo_saida',label:'Saida para Almoco'},
+    {tipo:'intervalo_retorno',label:'Retorno do Almoco'},
+    {tipo:'intervalo_saida',label:'Intervalo 2 - Inicio'},
+    {tipo:'intervalo_retorno',label:'Intervalo 2 - Fim'},
+    {tipo:'saida',label:'Encerramento do Expediente'}
+  ];
 
-  // USER
-  const user=JSON.parse(sessionStorage.getItem('ps_user')||'{"name":"Colaborador","email":"colaborador@email.com"}');
-  document.getElementById('greetName').textContent=user.name||'Colaborador';
-  document.getElementById('profileName').textContent=user.name||'Colaborador';
-  document.getElementById('profileEmail').textContent=user.email||'';
-  document.getElementById('profileAvatar').textContent=(user.name||'C').charAt(0).toUpperCase();
+  function dateKeyLocal(input){
+    const d=new Date(input);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
 
-  // CLOCK
+  function aplicarDadosPerfil(){
+    document.getElementById('greetName').textContent=user.name||'Colaborador';
+    document.getElementById('profileName').textContent=user.name||'Colaborador';
+    document.getElementById('profileRole').textContent=user.role==='rh'?'RH':'Colaborador';
+    document.getElementById('profileId').textContent='CPF: '+(user.cpf||'-');
+    document.getElementById('profileDept').textContent=user.department||'Nao informado';
+    document.getElementById('profileUnit').textContent='Empresa ID '+(user.empresaId||'-');
+    document.getElementById('profileShift').textContent=(user.shift||'08:00-17:00').replace('-', ' - ');
+    document.getElementById('profileEmail').textContent=user.email||'';
+    document.getElementById('profileAvatar').textContent=(user.name||'C').charAt(0).toUpperCase();
+    document.getElementById('shiftLabel').textContent=(user.shift||'08:00-17:00').replace('-', ' - ');
+  }
+
+  async function sincronizarPerfilColaborador(){
+    try{
+      const me=await api('/me');
+      user.name=me.nome||user.name;
+      user.email=me.email||user.email;
+      user.cpf=me.cpf||user.cpf;
+      user.role=me.perfil||user.role;
+      user.shift=me.jornada||user.shift;
+      sessionStorage.setItem('ps_user',JSON.stringify(user));
+      aplicarDadosPerfil();
+    }catch(_e){}
+  }
+
+  aplicarDadosPerfil();
+
+  async function api(path,options={}){
+    const response=await fetch(API_URL+path,{...options,headers:{'Content-Type':'application/json',...(options.headers||{}),Authorization:'Bearer '+token}});
+    if(!response.ok){
+      let msg='Erro na requisicao';
+      try{const data=await response.json();msg=data.error||msg;}catch{}
+      throw new Error(msg);
+    }
+    const ct=response.headers.get('content-type')||'';
+    if(ct.includes('application/json')) return response.json();
+    return response;
+  }
+
   function updateClock(){
     const now=new Date();
     document.getElementById('liveClock').textContent=now.toLocaleTimeString('pt-BR');
     document.getElementById('liveDate').textContent=WEEKDAYS[now.getDay()]+', '+now.getDate()+' de '+MONTHS[now.getMonth()]+' de '+now.getFullYear();
     document.getElementById('greetDate').textContent=WEEKDAYS[now.getDay()]+', '+now.getDate()+' de '+MONTHS[now.getMonth()]+' de '+now.getFullYear();
     document.getElementById('statusTime').textContent=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    // Greeting
     const h=now.getHours();
-    const greetEl=document.querySelector('.greet-text');
-    if(h<12)greetEl.textContent='Bom dia,';
-    else if(h<18)greetEl.textContent='Boa tarde,';
-    else greetEl.textContent='Boa noite,';
+    document.querySelector('.greet-text').textContent=h<12?'Bom dia,':h<18?'Boa tarde,':'Boa noite,';
   }
   setInterval(updateClock,1000);
   updateClock();
 
-  // GEOLOCATION
   function getGeo(){
     if(!navigator.geolocation){
       document.getElementById('geoAddr').textContent='Geolocalizacao nao disponivel';
       document.getElementById('geoBadge').textContent='SEM GPS';
-      document.getElementById('geoBadge').style.background='rgba(239,68,68,.2)';
-      document.getElementById('geoBadge').style.color='#EF4444';
       return;
     }
     navigator.geolocation.getCurrentPosition(pos=>{
       document.getElementById('geoAddr').textContent='Lat: '+pos.coords.latitude.toFixed(4)+' | Lon: '+pos.coords.longitude.toFixed(4);
       document.getElementById('geoBadge').textContent='VALIDADO';
-      document.getElementById('geoBadge').style.background='rgba(0,169,79,.25)';
-      document.getElementById('geoBadge').style.color='#00A94F';
-    },err=>{
-      document.getElementById('geoAddr').textContent='Empresa - Campina Grande, PB';
-      document.getElementById('geoBadge').textContent='DEMO';
-    },{timeout:8000});
+    },()=>{
+      document.getElementById('geoAddr').textContent='Nao foi possivel obter localizacao';
+      document.getElementById('geoBadge').textContent='SEM GPS';
+    },{timeout:5000});
   }
   getGeo();
 
-  // TABS
   function switchTab(tab){
     document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
     document.getElementById('panel-'+tab).classList.add('active');
-    document.getElementById('tab-'+tab).classList.add('active');
-    document.getElementById('nav-'+tab).classList.add('active');
-    if(tab==='historico')renderHistory();
-    if(tab==='solicitacoes')renderRequests();
+    const navBtn=document.getElementById('nav-'+tab);
+    if(navBtn) navBtn.classList.add('active');
+    if(tab==='historico') renderHistory();
+    if(tab==='solicitacoes') renderRequests();
+    if(tab==='perfil') renderPerfilNotificacoes();
   }
 
-  // PUNCH
   const workStates={
-    fora:{label:'Registrar Entrada',icon:'fa-fingerprint',cls:'entrada',statusLabel:'Expediente nao iniciado'},
-    trabalhando:{label:'Registrar Saida',icon:'fa-sign-out-alt',cls:'saida',statusLabel:'Em expediente'},
-    intervalo:{label:'Retornar do Intervalo',icon:'fa-play-circle',cls:'intervalo',statusLabel:'Em intervalo'}
+    fora:{statusLabel:'Expediente nao iniciado'},
+    trabalhando:{statusLabel:'Em expediente'},
+    intervalo:{statusLabel:'Em intervalo'}
   };
 
+  function getRegistrosHojeOrdenados(){
+    const todayKey=dateKeyLocal(new Date());
+    return registrosMes
+      .filter(r=>dateKeyLocal(r.batida)===todayKey)
+      .sort((a,b)=>new Date(a.batida)-new Date(b.batida));
+  }
+
+  function getProximoPassoHoje(){
+    const hoje=getRegistrosHojeOrdenados();
+    const idx=hoje.length%FLUXO_DIA.length;
+    return {
+      idx,
+      passo: FLUXO_DIA[idx]||null
+    };
+  }
+
+  function getLabelTipoPelaSequencia(day, index){
+    const seqIndex=index%FLUXO_DIA.length;
+    if(FLUXO_DIA[seqIndex]) return FLUXO_DIA[seqIndex].label;
+    const fallback={entrada:'Entrada',saida:'Saida',intervalo_saida:'Intervalo',intervalo_retorno:'Fim do Intervalo'};
+    return fallback[day[index].tipo]||day[index].tipo;
+  }
+
   function updatePunchBtn(){
-    const s=workStates[workStatus];
-    const btn=document.getElementById('punchBtn');
-    btn.className='punch-btn '+s.cls;
-    btn.querySelector('.btn-label').innerHTML='<i class="fas '+s.icon+'"></i> '+s.label;
-    document.getElementById('statusLabel').textContent=s.statusLabel;
-    document.getElementById('breakStartBtn').disabled=workStatus!=='trabalhando';
-    document.getElementById('breakEndBtn').disabled=workStatus!=='intervalo';
+    const s=workStates[workStatus]||workStates.fora;
+    const proximo=getProximoPassoHoje();
+    const proximoTipo=proximo.passo?.tipo||'';
+
+    document.getElementById('statusLabel').textContent=proximo.passo?('Proxima batida: '+proximo.passo.label):'Expediente encerrado';
+    document.getElementById('entryBtn').disabled=proximoTipo!=='entrada';
+    document.getElementById('breakStartBtn').disabled=proximoTipo!=='intervalo_saida';
+    document.getElementById('breakEndBtn').disabled=proximoTipo!=='intervalo_retorno';
+    document.getElementById('exitBtn').disabled=proximoTipo!=='saida';
+
+    const step=proximo.idx;
+    const breakStartLabel=step===1?'Registrar Intervalo':step===3?'Saida para Almoco':step===5?'Intervalo da Tarde':'Iniciar Pausa';
+    const breakEndLabel=step===2?'Fim do Intervalo':step===4?'Retorno do Almoco':step===6?'Fim do Intervalo Tarde':'Retorno da Pausa';
+    document.getElementById('breakStartBtn').innerHTML='<i class="fas fa-coffee"></i> '+breakStartLabel;
+    document.getElementById('breakEndBtn').innerHTML='<i class="fas fa-play-circle"></i> '+breakEndLabel;
+    document.getElementById('entryBtn').innerHTML='<i class="fas fa-sign-in-alt"></i> Registrar Entrada';
+    document.getElementById('exitBtn').innerHTML='<i class="fas fa-sign-out-alt"></i> Encerrar Expediente';
   }
 
-  function addPunchRecord(type,dot){
-    const now=new Date();
-    todayPunches.push({type,dot,time:now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})});
-  }
-
-  function registrarPonto(){
-    const btn=document.getElementById('punchBtn');
-    btn.classList.add('loading');
-    setTimeout(()=>{
-      btn.classList.remove('loading');
-      if(workStatus==='fora'){
-        addPunchRecord('Entrada','entrada');
-        workStatus='trabalhando';
-      }else if(workStatus==='trabalhando'){
-        addPunchRecord('Saida','saida');
-        workStatus='fora';
-      }else{
-        addPunchRecord('Retorno Intervalo','retorno');
-        workStatus='trabalhando';
-      }
-      updatePunchBtn();
-      renderTimeline();
-      showToast('Ponto registrado com sucesso!','success');
-    },1200);
-  }
-
-  function registrarIntervalo(tipo){
-    if(tipo==='inicio'){
-      if(workStatus!=='trabalhando'){
-        showToast('Inicie o expediente antes de sair para intervalo','error');
-        return;
-      }
-      addPunchRecord('Saida Intervalo','intervalo');
-      workStatus='intervalo';
-      updatePunchBtn();
-      renderTimeline();
-      showToast('Saida para intervalo registrada!','success');
+  function atualizarEstadoPorRegistrosHoje(){
+    const hoje=getRegistrosHojeOrdenados();
+    if(!hoje.length){
+      workStatus='fora';
       return;
     }
-    if(workStatus!=='intervalo'){
-      showToast('Nao ha intervalo em andamento','error');
-      return;
+    const last=hoje.sort((a,b)=>new Date(a.batida)-new Date(b.batida))[hoje.length-1];
+    if(last.tipo==='entrada'||last.tipo==='intervalo_retorno') workStatus='trabalhando';
+    else if(last.tipo==='intervalo_saida') workStatus='intervalo';
+    else workStatus='fora';
+  }
+
+  async function registrarEntrada(){
+    try{
+      const proximo=getProximoPassoHoje().passo;
+      if(!proximo||proximo.tipo!=='entrada') return showToast('A sequencia de batidas deve ser seguida','error');
+      await api('/colaborador/pontos',{method:'POST',body:JSON.stringify({tipo:'entrada'})});
+      workStatus='trabalhando';
+      updatePunchBtn();
+      await carregarPontosMes();
+      showToast('Entrada registrada com sucesso!','success');
+    }catch(err){
+      showToast(err.message,'error');
     }
-    addPunchRecord('Retorno Intervalo','retorno');
-    workStatus='trabalhando';
-    updatePunchBtn();
-    renderTimeline();
-    showToast('Retorno do intervalo registrado!','success');
+  }
+
+  async function registrarSaida(){
+    try{
+      const proximo=getProximoPassoHoje().passo;
+      if(!proximo||proximo.tipo!=='saida') return showToast('Finalize toda a sequencia antes de encerrar o expediente','error');
+      await api('/colaborador/pontos',{method:'POST',body:JSON.stringify({tipo:'saida'})});
+      workStatus='fora';
+      updatePunchBtn();
+      await carregarPontosMes();
+      showToast('Saida registrada com sucesso!','success');
+    }catch(err){
+      showToast(err.message,'error');
+    }
+  }
+
+  async function registrarIntervalo(tipo){
+    try{
+      const proximo=getProximoPassoHoje().passo;
+      const esperado=tipo==='inicio'?'intervalo_saida':'intervalo_retorno';
+      if(!proximo||proximo.tipo!==esperado) return showToast('A sequencia de batidas deve ser seguida','error');
+      await api('/colaborador/pontos',{method:'POST',body:JSON.stringify({tipo:esperado})});
+      workStatus=esperado==='intervalo_saida'?'intervalo':'trabalhando';
+      updatePunchBtn();
+      await carregarPontosMes();
+      showToast('Registro realizado!','success');
+    }catch(err){
+      showToast(err.message,'error');
+    }
   }
 
   function renderTimeline(){
+    const hoje=getRegistrosHojeOrdenados();
     const tl=document.getElementById('timelineToday');
-    if(todayPunches.length===0){
+    if(!hoje.length){
       tl.innerHTML='<div class="tl-item"><div class="tl-dot intervalo"><i class="fas fa-clock"></i></div><div class="tl-content"><div class="tl-label">Nenhum registro hoje</div><div class="tl-time">Registre seu ponto acima</div></div></div>';
       return;
     }
-    const icons={entrada:'fa-sign-in-alt',saida:'fa-sign-out-alt','Saida Intervalo':'fa-coffee','Retorno Intervalo':'fa-play-circle'};
-    tl.innerHTML=todayPunches.map(p=>`
-      <div class="tl-item">
-        <div class="tl-dot ${p.dot}"><i class="fas ${icons[p.type]||'fa-clock'}"></i></div>
-        <div class="tl-content">
-          <div class="tl-label">${p.type}</div>
-          <div class="tl-time">${p.time}</div>
-        </div>
-        <span class="tl-badge ok">OK</span>
-      </div>
-    `).join('');
+    const dots={entrada:'entrada',saida:'saida',intervalo_saida:'intervalo',intervalo_retorno:'retorno'};
+    const icons={entrada:'fa-sign-in-alt',saida:'fa-sign-out-alt',intervalo_saida:'fa-coffee',intervalo_retorno:'fa-play-circle'};
+    tl.innerHTML=hoje.map((p,idx)=>`<div class="tl-item"><div class="tl-dot ${dots[p.tipo]||'intervalo'}"><i class="fas ${icons[p.tipo]||'fa-clock'}"></i></div><div class="tl-content"><div class="tl-label">${getLabelTipoPelaSequencia(hoje,idx)}</div><div class="tl-time">${new Date(p.batida).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div></div><span class="tl-badge ok">OK</span></div>`).join('');
   }
 
-  // HISTORY
-  const demoHistory=[
-    {day:18,wk:'Sex',hours:'8h 15m',punches:'08:02 | 12:00 | 13:05 | 18:17',badge:'ok',badgeTxt:'Normal'},
-    {day:17,wk:'Qui',hours:'9h 05m',punches:'07:55 | 12:00 | 13:00 | 17:00',badge:'extra',badgeTxt:'Hora Extra'},
-    {day:16,wk:'Qua',hours:'8h 00m',punches:'08:01 | 12:00 | 13:00 | 17:01',badge:'ok',badgeTxt:'Normal'},
-    {day:15,wk:'Ter',hours:'7h 48m',punches:'08:14 | 12:00 | 13:02 | 17:04',badge:'inc',badgeTxt:'Atraso'},
-    {day:14,wk:'Seg',hours:'8h 10m',punches:'07:50 | 12:05 | 13:05 | 18:00',badge:'ok',badgeTxt:'Normal'},
-    {day:11,wk:'Sex',hours:'0h 00m',punches:'Atestado medico',badge:'falta',badgeTxt:'Atestado'},
-    {day:10,wk:'Qui',hours:'8h 30m',punches:'07:30 | 12:00 | 13:00 | 17:00',badge:'extra',badgeTxt:'Hora Extra'},
-    {day:9,wk:'Qua',hours:'8h 00m',punches:'08:00 | 12:00 | 13:00 | 17:00',badge:'ok',badgeTxt:'Normal'},
-  ];
+  function calcWorkedMinutes(day){
+    const entrada=day.find(x=>x.tipo==='entrada');
+    const saida=[...day].reverse().find(x=>x.tipo==='saida');
+    if(!entrada||!saida) return 0;
+    let mins=Math.max(0,Math.round((new Date(saida.batida)-new Date(entrada.batida))/60000));
+    let pauseStart=null;
+    let pausa=0;
+    day.forEach(x=>{
+      if(x.tipo==='intervalo_saida'){ pauseStart=new Date(x.batida); return; }
+      if(x.tipo==='intervalo_retorno' && pauseStart){
+        pausa+=Math.max(0,Math.round((new Date(x.batida)-pauseStart)/60000));
+        pauseStart=null;
+      }
+    });
+    return Math.max(0,mins-pausa);
+  }
+
+  function parseShiftMinutes(shift='08:00-17:00'){
+    const m=String(shift||'08:00-17:00').match(/(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/);
+    if(!m) return 8*60;
+    const start=Number(m[1])*60+Number(m[2]);
+    const end=Number(m[3])*60+Number(m[4]);
+    const diff=end-start;
+    return diff>0?diff:8*60;
+  }
+
+  function toHm(mins){
+    const safe=Math.max(0,Math.round(mins));
+    const h=Math.floor(safe/60);
+    const m=safe%60;
+    return h+'h '+String(m).padStart(2,'0')+'m';
+  }
+
+  function calcResumoMesFrontend(){
+    const map={};
+    registrosMes.forEach(r=>{
+      const k=dateKeyLocal(r.batida);
+      map[k]=map[k]||[];
+      map[k].push(r);
+    });
+    const jornada=parseShiftMinutes(user.shift||'08:00-17:00');
+    let total=0;
+    let extras=0;
+    let atrasos=0;
+    Object.keys(map).forEach(k=>{
+      const day=map[k].sort((a,b)=>new Date(a.batida)-new Date(b.batida));
+      const mins=calcWorkedMinutes(day);
+      if(mins<=0) return;
+      total+=mins;
+      if(mins>jornada) extras+=(mins-jornada);
+      if(mins<jornada) atrasos+=(jornada-mins);
+    });
+    return {total,extras,atrasos,saldo:extras-atrasos,jornada};
+  }
 
   function renderHistory(){
+    const map={};
+    registrosMes.forEach(r=>{
+      const k=dateKeyLocal(r.batida);
+      map[k]=map[k]||[];
+      map[k].push(r);
+    });
+
+    const keys=Object.keys(map).sort((a,b)=>b.localeCompare(a));
     const list=document.getElementById('historyList');
-    list.innerHTML=demoHistory.map(h=>`
-      <div class="hist-card">
-        <div class="hist-day"><div class="hd-num">${h.day}</div><div class="hd-wk">${h.wk}</div></div>
-        <div class="hist-divider"></div>
-        <div class="hist-content">
-          <div class="hist-hours">${h.hours}</div>
-          <div class="hist-punches">${h.punches}</div>
-        </div>
-        <span class="hist-badge ${h.badge}">${h.badgeTxt}</span>
-      </div>
-    `).join('');
+    list.innerHTML=keys.map(k=>{
+      const day=map[k].sort((a,b)=>new Date(a.batida)-new Date(b.batida));
+      const d=new Date(k+'T12:00:00');
+      const entrada=day.find(x=>x.tipo==='entrada');
+      const saida=[...day].reverse().find(x=>x.tipo==='saida');
+      const mins=calcWorkedMinutes(day);
+      const jornada=parseShiftMinutes(user.shift||'08:00-17:00');
+      const extra=Math.max(0,mins-jornada);
+      const atraso=Math.max(0,jornada-mins);
+      const horas=toHm(mins);
+      const punches=day.map((x,idx)=>`${getLabelTipoPelaSequencia(day,idx)}: ${new Date(x.batida).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`).join('<br/>');
+      return `<div class="hist-card"><div class="hist-day"><div class="hd-num">${d.getDate()}</div><div class="hd-wk">${WEEKDAYS[d.getDay()].slice(0,3)}</div></div><div class="hist-divider"></div><div class="hist-content"><div class="hist-hours">Total do dia: ${horas} | Extra: ${toHm(extra)} | Atraso: ${toHm(atraso)}</div><div class="hist-punches">${punches||'Sem registros completos'}</div></div><span class="hist-badge ok">${entrada&&saida?'Normal':'Incompleto'}</span></div>`;
+    }).join('') || '<div style="padding:12px;color:#64748B">Sem registros no mes.</div>';
   }
 
   function changeMonth(dir){
@@ -644,46 +774,140 @@
     if(currentMonth<0){currentMonth=11;currentYear--;}
     if(currentMonth>11){currentMonth=0;currentYear++;}
     document.getElementById('monthLabel').textContent=MONTHS[currentMonth]+' '+currentYear;
+    carregarPontosMes();
   }
 
-  // REQUESTS
-  const demoRequests=[
-    {type:'Correcao de Ponto',date:'15/04/2026',desc:'Esqueci de registrar saida no dia 15',status:'pendente'},
-    {type:'Atestado Medico',date:'11/04/2026',desc:'Consulta medica - CID: Z00.0',status:'aprovado'},
-    {type:'Folga Compensatoria',date:'05/04/2026',desc:'Compensacao de horas extras do mes anterior',status:'negado'},
-  ];
+  function onCentralTypeChange(){
+    const centralType=document.getElementById('centralType').value;
+    const reqTypeWrap=document.getElementById('reqType').closest('.form-row');
+    const reqTypeLabel=document.getElementById('reqTypeLabel');
+    const reqDescLabel=document.getElementById('reqDescLabel');
+    const atestadoWrap=document.getElementById('atestadoFileWrap');
+    const btn=document.getElementById('btnSubmitCentral');
+    const desc=document.getElementById('reqDesc');
+
+    if(centralType==='atestado'){
+      reqTypeWrap.style.display='none';
+      atestadoWrap.style.display='block';
+      reqTypeLabel.textContent='Tipo de Solicitacao';
+      reqDescLabel.textContent='Descricao do Atestado';
+      desc.placeholder='Ex: consulta medica, CID, observacoes';
+      btn.innerHTML='<i class="fas fa-upload"></i> Enviar Atestado';
+      return;
+    }
+
+    reqTypeWrap.style.display='block';
+    atestadoWrap.style.display='none';
+    reqDescLabel.textContent='Descricao';
+    desc.placeholder='Descreva o motivo da solicitacao...';
+    btn.innerHTML='<i class="fas fa-paper-plane"></i> Enviar Solicitacao';
+  }
+
+  async function submitRequest(){
+    const tipo=document.getElementById('reqType').value;
+    const data_referencia=document.getElementById('reqDate').value;
+    const descricao=document.getElementById('reqDesc').value.trim();
+    if(!tipo||!data_referencia||!descricao){
+      return showToast('Preencha todos os campos','error');
+    }
+    try{
+      await api('/colaborador/solicitacoes',{method:'POST',body:JSON.stringify({tipo,descricao,data_referencia})});
+      document.getElementById('reqType').value='';
+      document.getElementById('reqDesc').value='';
+      await carregarSolicitacoes();
+      showToast('Solicitacao enviada com sucesso!','success');
+    }catch(err){
+      showToast(err.message,'error');
+    }
+  }
+
+  async function submitCentral(){
+    const centralType=document.getElementById('centralType').value;
+    if(centralType==='atestado') return enviarAtestado();
+    return submitRequest();
+  }
 
   function renderRequests(){
     const list=document.getElementById('reqList');
-    const all=[...demoRequests,...requests];
-    if(all.length===0){list.innerHTML='<div style="text-align:center;color:var(--gray-500);font-size:13px;padding:20px">Nenhuma solicitacao ainda</div>';return;}
-    list.innerHTML=all.map(r=>`
-      <div class="req-item">
-        <div class="ri-header">
-          <span class="ri-type">${r.type}</span>
-          <span class="ri-status ${r.status}">${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</span>
-        </div>
-        <div class="ri-desc">${r.desc}</div>
-        <div class="ri-date">${r.date}</div>
-      </div>
-    `).join('');
+    const itens=[
+      ...solicitacoes.map(r=>({
+        origem:'Solicitacao',
+        tipo:r.tipo,
+        descricao:r.descricao,
+        status:r.status,
+        data:r.data_cadastro
+      })),
+      ...atestadosColab.map(a=>({
+        origem:'Atestado',
+        tipo:'atestado',
+        descricao:a.descricao||'Atestado medico',
+        status:a.status,
+        data:a.data_cadastro
+      }))
+    ].sort((a,b)=>new Date(b.data)-new Date(a.data));
+
+    list.innerHTML=itens.map(r=>`<div class="req-item"><div class="ri-header"><span class="ri-type">${r.origem}: ${r.tipo}</span><span class="ri-status ${r.status}">${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</span></div><div class="ri-desc">${r.descricao}</div><div class="ri-date">${new Date(r.data).toLocaleDateString('pt-BR')}</div></div>`).join('') || '<div style="padding:12px;color:#64748B">Nenhum item enviado ainda.</div>';
   }
 
-  function submitRequest(){
-    const type=document.getElementById('reqType').value;
-    const date=document.getElementById('reqDate').value;
-    const desc=document.getElementById('reqDesc').value;
-    if(!type||!date||!desc){showToast('Preencha todos os campos','error');return;}
-    const d=new Date(date);
-    requests.unshift({type,date:d.toLocaleDateString('pt-BR'),desc,status:'pendente'});
-    document.getElementById('reqType').value='';
-    document.getElementById('reqDate').value='';
-    document.getElementById('reqDesc').value='';
-    renderRequests();
-    showToast('Solicitacao enviada com sucesso!','success');
+  function getNotificacoesPerfil(){
+    const notifSolic=(solicitacoes||[])
+      .filter(s=>s.status&&s.status!=='pendente')
+      .map(s=>({
+        data:new Date(s.data_atualizacao||s.data_cadastro||new Date()),
+        texto:`Sua solicitacao de ${s.tipo} foi ${s.status==='aprovado'?'aprovada':'reprovada'} pelo RH.`
+      }));
+
+    const notifAtest=(atestadosColab||[])
+      .filter(a=>a.status&&a.status!=='pendente')
+      .map(a=>({
+        data:new Date(a.data_atualizacao||a.data_cadastro||new Date()),
+        texto:`Seu atestado (${a.descricao||'documento'}) foi ${a.status==='aprovado'?'aprovado':'reprovado'} pelo RH.`
+      }));
+
+    return [...notifSolic,...notifAtest].sort((a,b)=>b.data-a.data);
   }
 
-  // TOAST
+  function renderPerfilNotificacoes(){
+    const list=getNotificacoesPerfil();
+    const box=document.getElementById('perfilNotifs');
+    const dot=document.getElementById('colabNotifDot');
+
+    if(!list.length){
+      dot.style.display='none';
+      box.innerHTML='<div style="padding:10px 12px;border:1px solid var(--gray-200);border-radius:10px;background:var(--white)">Sem notificacoes no momento.</div>';
+      return;
+    }
+
+    dot.style.display='block';
+    box.innerHTML=list.slice(0,8).map(n=>`<div style="padding:10px 12px;border:1px solid var(--gray-200);border-radius:10px;background:var(--white)"><div style="font-weight:600;color:var(--navy)">${n.texto}</div><div style="margin-top:4px;color:var(--gray-500)">${n.data.toLocaleDateString('pt-BR')} ${n.data.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div></div>`).join('');
+  }
+
+  async function enviarAtestado(){
+    const file=document.getElementById('atestadoFile').files[0];
+    const descricao=document.getElementById('reqDesc').value.trim()||'Atestado medico';
+    const dataRef=document.getElementById('reqDate').value;
+    if(!file) return showToast('Selecione um arquivo','error');
+    if(!dataRef) return showToast('Informe a data do atestado','error');
+
+    const formData=new FormData();
+    formData.append('descricao',descricao);
+    formData.append('data_referencia',dataRef);
+    formData.append('arquivo',file);
+
+    try{
+      const resp=await fetch(API_URL+'/colaborador/atestados',{method:'POST',headers:{Authorization:'Bearer '+token},body:formData});
+      const data=await resp.json();
+      if(!resp.ok) throw new Error(data.error||'Falha ao enviar atestado');
+      document.getElementById('reqDesc').value='';
+      document.getElementById('atestadoFile').value='';
+      await carregarAtestadosColab();
+      renderRequests();
+      showToast('Atestado enviado com sucesso!','success');
+    }catch(err){
+      showToast(err.message,'error');
+    }
+  }
+
   function showToast(msg,type='success'){
     const t=document.getElementById('toast');
     const icon=document.getElementById('toastIcon');
@@ -694,20 +918,62 @@
     setTimeout(()=>t.classList.remove('show'),3000);
   }
 
-  // LOGOUT
   function logout(){
     sessionStorage.clear();
     window.location.href='index.html';
   }
 
-  // INIT
-  updatePunchBtn();
-  renderHistory();
-  renderRequests();
+  async function carregarResumoMensal(){
+    const resumo=calcResumoMesFrontend();
+    document.getElementById('mesHoras').textContent=toHm(resumo.total);
+    document.getElementById('mesExtras').textContent=toHm(resumo.extras);
+    document.getElementById('mesAtrasos').textContent=toHm(resumo.atrasos);
+    document.getElementById('mesSaldoExtra').textContent=(resumo.saldo<0?'-':'')+toHm(Math.abs(resumo.saldo));
+    const histMes=document.getElementById('histMesResumo');
+    const histSaldo=document.getElementById('histSaldoResumo');
+    if(histMes) histMes.textContent=toHm(resumo.total);
+    if(histSaldo) histSaldo.textContent=(resumo.saldo<0?'-':'')+toHm(Math.abs(resumo.saldo));
+    const hint=document.getElementById('extraCalcHint');
+    if(hint){
+      const dias=Math.max(1,Object.keys(registrosMes.reduce((acc,r)=>{acc[dateKeyLocal(r.batida)]=1;return acc;},{})).length);
+      hint.textContent='Extras calculadas por somatoria diaria: max(total do dia - jornada, 0). Atrasos: max(jornada - total do dia, 0). Jornada usada: '+toHm(resumo.jornada)+' por dia em '+dias+' dia(s) com registro.';
+    }
+  }
 
-  // Set today date input
-  const td=new Date();
-  document.getElementById('reqDate').value=td.toISOString().split('T')[0];
+  async function carregarPontosMes(){
+    try{
+      const mes=currentMonth+1;
+      registrosMes=await api('/colaborador/pontos?month='+mes+'&year='+currentYear);
+      atualizarEstadoPorRegistrosHoje();
+      updatePunchBtn();
+      renderTimeline();
+      renderHistory();
+      await carregarResumoMensal();
+    }catch(err){
+      showToast(err.message,'error');
+    }
+  }
+
+  async function carregarSolicitacoes(){
+    solicitacoes=await api('/colaborador/solicitacoes');
+    renderRequests();
+    renderPerfilNotificacoes();
+  }
+
+  async function carregarAtestadosColab(){
+    atestadosColab=await api('/colaborador/atestados');
+    renderPerfilNotificacoes();
+  }
+
+  document.getElementById('monthLabel').textContent=MONTHS[currentMonth]+' '+currentYear;
+  document.getElementById('reqDate').value=(new Date()).toISOString().split('T')[0];
+  onCentralTypeChange();
+  updatePunchBtn();
+  carregarPontosMes();
+  carregarSolicitacoes();
+  carregarAtestadosColab();
+  sincronizarPerfilColaborador();
+  setInterval(sincronizarPerfilColaborador,30000);
 </script>
 </body>
 </html>
